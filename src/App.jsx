@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { PlatformProvider } from './context/PlatformContext'
 import { Nav } from './components/Nav'
 import { Hero } from './components/Hero'
 import { Dashboard } from './components/Dashboard'
@@ -28,11 +29,13 @@ function Landing() {
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/platform" element={<PlatformBoard />} />
-      </Routes>
-    </BrowserRouter>
+    <PlatformProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/platform" element={<PlatformBoard />} />
+        </Routes>
+      </BrowserRouter>
+    </PlatformProvider>
   )
 }
