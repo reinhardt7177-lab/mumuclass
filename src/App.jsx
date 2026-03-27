@@ -1,3 +1,4 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { Nav } from './components/Nav'
 import { Hero } from './components/Hero'
 import { Dashboard } from './components/Dashboard'
@@ -7,8 +8,9 @@ import { Process } from './components/Process'
 import { Stats } from './components/Stats'
 import { CTA } from './components/CTA'
 import { Footer } from './components/Footer'
+import { PlatformBoard } from './pages/PlatformBoard'
 
-export default function App() {
+function Landing() {
   return (
     <>
       <Nav />
@@ -21,5 +23,16 @@ export default function App() {
       <CTA />
       <Footer />
     </>
+  )
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Landing />} />
+        <Route path="/platform" element={<PlatformBoard />} />
+      </Routes>
+    </BrowserRouter>
   )
 }

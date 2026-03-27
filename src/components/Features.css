@@ -130,3 +130,24 @@
     max-width: 400px;
   }
 }
+
+.feature-card__board-btn {
+  margin-top: 4px;
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 0.5px solid color-mix(in srgb, var(--btn-color, #6C3CE0) 35%, transparent);
+  background: color-mix(in srgb, var(--btn-color, #6C3CE0) 10%, transparent);
+  color: var(--btn-color, #6C3CE0);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  font-family: inherit;
+  letter-spacing: -0.1px;
+}
+
+.feature-card__board-btn:hover {
+  background: color-mix(in srgb, var(--btn-color, #6C3CE0) 20%, transparent);
+  transform: translateY(-1px);
+}

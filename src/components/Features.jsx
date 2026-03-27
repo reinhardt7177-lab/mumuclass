@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { FadeIn } from './FadeIn'
 import { GlowOrb } from './GlowOrb'
 import './Features.css'
@@ -33,6 +34,7 @@ const features = [
 ]
 
 export function Features() {
+  const navigate = useNavigate()
   return (
     <section id="platform" className="features">
       <GlowOrb x="20%" y="30%" color="rgba(108,60,224,0.08)" size={600} />
@@ -76,6 +78,15 @@ export function Features() {
                   </div>
                 ))}
               </div>
+              {f.title === 'Platform' && (
+                <button
+                  className="feature-card__board-btn"
+                  style={{ '--btn-color': f.color }}
+                  onClick={() => navigate('/platform')}
+                >
+                  게시판 보기 →
+                </button>
+              )}
             </div>
           </FadeIn>
         ))}
