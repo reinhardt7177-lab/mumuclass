@@ -1,12 +1,10 @@
-import './Footer.css'
-
-const columns = [
-  { title: 'Product', links: ['Platform', 'Funding', 'Community', 'Pricing'] },
-  { title: 'Company', links: ['About', 'Blog', 'Careers', 'Contact'] },
-  { title: 'Resources', links: ['Docs', 'API', 'Templates', 'Support'] },
-]
-
 export function Footer() {
+  const columns = [
+    { title: '서비스', links: ['앱 게시판', '교육상품', '커뮤니티'] },
+    { title: '지원', links: ['도움말', '문의하기', '이용약관'] },
+    { title: '소식', links: ['블로그', '업데이트', '채용'] },
+  ]
+
   return (
     <footer className="footer">
       <div className="footer__inner">
@@ -18,8 +16,7 @@ export function Footer() {
             </span>
           </div>
           <p className="footer__tagline">
-            교육자를 위한, 교육자에 의한 플랫폼.
-            <br />
+            교육자를 위한, 교육자에 의한 플랫폼.<br />
             학교를 무궁무진하게 발전시키는 에듀테크 허브.
           </p>
         </div>
@@ -29,9 +26,7 @@ export function Footer() {
             <h4 className="footer__col-title">{col.title}</h4>
             <div className="footer__col-links">
               {col.links.map((l) => (
-                <a key={l} href="#">
-                  {l}
-                </a>
+                <a key={l} href="#">{l}</a>
               ))}
             </div>
           </div>
