@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { FadeIn } from './FadeIn'
 import './Dashboard.css'
 
@@ -24,8 +25,22 @@ const stats = [
   { label: 'Community', value: '847', color: '#F9CB42' },
 ]
 
+const platformPreviews = [
+  { name: '출석체크 앱', category: '웹앱', color: '#6C3CE0', status: 'Live', statusColor: '#5DCAA5' },
+  { name: '학급 규칙 생성기', category: '학급경영', color: '#5DCAA5', status: 'Live', statusColor: '#5DCAA5' },
+  { name: '수업 계획서 템플릿', category: '템플릿', color: '#F9CB42', status: 'Live', statusColor: '#5DCAA5' },
+  { name: 'NEIS API 래퍼', category: '교육 API', color: '#E24B4A', status: 'Beta', statusColor: '#F9CB42' },
+]
+
+const platformStats = [
+  { label: '게시물', value: '24+', color: '#A78BFA' },
+  { label: '다운로드', value: '28k', color: '#5DCAA5' },
+  { label: '교사 기여', value: '12명', color: '#F9CB42' },
+]
+
 export function Dashboard() {
   const [activeTab, setActiveTab] = useState('Dashboard')
+  const navigate = useNavigate()
 
   return (
     <FadeIn style={{ maxWidth: 680, margin: '0 auto', padding: '0 24px' }}>
@@ -52,43 +67,95 @@ export function Dashboard() {
           </div>
 
           <div className="dash__main">
-            <div className="dash__header">
-              <span className="dash__title">Dashboard</span>
-              <span className="dash__date">2026.03.26</span>
-            </div>
-
-            <div className="dash__stats">
-              {stats.map((s) => (
-                <div key={s.label} className="dash__stat">
-                  <div className="dash__stat-label">{s.label}</div>
-                  <div className="dash__stat-value" style={{ color: s.color }}>
-                    {s.value}
-                  </div>
+            {activeTab === 'My Platforms' ? (
+              <>
+                <div className="dash__header">
+                  <span className="dash__title">플랫폼 게시판</span>
+                  <span className="dash__live-dot" />
                 </div>
-              ))}
-            </div>
 
-            <div className="dash__projects">
-              <span className="dash__projects-label">Recent projects</span>
-              {projects.map((p) => (
-                <div key={p.name} className="dash__project">
-                  <div
-                    className="dash__project-dot"
-                    style={{ background: p.color }}
-                  />
-                  <span className="dash__project-name">{p.name}</span>
-                  <span
-                    className="dash__project-tag"
-                    style={{
-                      background: `${p.color}18`,
-                      color: p.color,
-                    }}
-                  >
-                    {p.status}
-                  </span>
+                <div className="dash__stats">
+                  {platformStats.map((s) => (
+                    <div key={s.label} className="dash__stat">
+                      <div className="dash__stat-label">{s.label}</div>
+                      <div className="dash__stat-value" style={{ color: s.color }}>
+                        {s.value}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+
+                <div className="dash__projects">
+                  <span className="dash__projects-label">최근 게시물</span>
+                  {platformPreviews.map((p) => (
+                    <div key={p.name} className="dash__project">
+                      <div
+                        className="dash__project-dot"
+                        style={{ background: p.color }}
+                      />
+                      <span className="dash__project-name">{p.name}</span>
+                      <span className="dash__project-cat">{p.category}</span>
+                      <span
+                        className="dash__project-tag"
+                        style={{
+                          background: `${p.statusColor}18`,
+                          color: p.statusColor,
+                        }}
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                <button
+                  className="dash__platform-btn"
+                  onClick={() => navigate('/platform')}
+                >
+                  게시판 전체 보기 →
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="dash__header">
+                  <span className="dash__title">Dashboard</span>
+                  <span className="dash__date">2026.03.30</span>
+                </div>
+
+                <div className="dash__stats">
+                  {stats.map((s) => (
+                    <div key={s.label} className="dash__stat">
+                      <div className="dash__stat-label">{s.label}</div>
+                      <div className="dash__stat-value" style={{ color: s.color }}>
+                        {s.value}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="dash__projects">
+                  <span className="dash__projects-label">Recent projects</span>
+                  {projects.map((p) => (
+                    <div key={p.name} className="dash__project">
+                      <div
+                        className="dash__project-dot"
+                        style={{ background: p.color }}
+                      />
+                      <span className="dash__project-name">{p.name}</span>
+                      <span
+                        className="dash__project-tag"
+                        style={{
+                          background: `${p.color}18`,
+                          color: p.color,
+                        }}
+                      >
+                        {p.status}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>
