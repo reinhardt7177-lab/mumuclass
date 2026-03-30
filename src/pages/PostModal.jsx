@@ -21,7 +21,7 @@ const EMPTY_FORM = {
   status: 'Beta',
 }
 
-export function PostModal({ onClose, onSuccess }) {
+export function PostModal({ onClose, onSuccess, useSupabase }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -44,12 +44,7 @@ export function PostModal({ onClose, onSuccess }) {
       .map((t) => t.trim())
       .filter(Boolean)
 
-    if (!supabase) {
-      setError('Supabase가 연결되지 않았습니다. .env 파일을 확인해 주세요.')
-      return
-    }
-    setLoading(true)
-    const { error: sbError } = await supabase.from('platform_posts').insert({
+    const postData = {
       title: form.title.trim(),
       description: form.description.trim(),
       author: form.author.trim(),
@@ -57,15 +52,26 @@ export function PostModal({ onClose, onSuccess }) {
       category: form.category,
       tags: tagsArray,
       status: form.status,
-    })
-    setLoading(false)
+    }
 
-    if (sbError) {
-      setError('게시 중 오류가 발생했습니다: ' + sbError.message)
+    // Supabase 연결 시 → DB에 저장
+    if (useSupabase && supabase) {
+      setLoading(true)
+      const { error: sbError } = await supabase.from('platform_posts').insert(postData)
+      setLoading(false)
+
+      if (sbError) {
+        setError('게시 중 오류가 발생했습니다: ' + sbError.message)
+        return
+      }
+
+      onSuccess?.(null)
+      onClose()
       return
     }
 
-    onSuccess?.()
+    // 로컬 모드 → 부모에게 데이터 전달
+    onSuccess?.(postData)
     onClose()
   }
 
