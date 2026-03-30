@@ -69,13 +69,18 @@ export function PlatformBoard() {
 
   const fetchPosts = useCallback(async () => {
     setLoading(true)
+    if (!supabase) {
+      setAllPosts(null)
+      setIsSupabaseConnected(false)
+      setLoading(false)
+      return
+    }
     const { data, error } = await supabase
       .from('platform_posts')
       .select('*')
       .order('created_at', { ascending: false })
 
     if (error || !data) {
-      // Supabase 미연결 또는 오류 → 폴백 데이터 사용
       setAllPosts(null)
       setIsSupabaseConnected(false)
     } else {

@@ -44,6 +44,10 @@ export function PostModal({ onClose, onSuccess }) {
       .map((t) => t.trim())
       .filter(Boolean)
 
+    if (!supabase) {
+      setError('Supabase가 연결되지 않았습니다. .env 파일을 확인해 주세요.')
+      return
+    }
     setLoading(true)
     const { error: sbError } = await supabase.from('platform_posts').insert({
       title: form.title.trim(),
