@@ -2,7 +2,7 @@ export function Footer() {
   const columns = [
     { title: '서비스', links: ['앱 게시판', '교육상품', '커뮤니티'] },
     { title: '지원', links: ['도움말', '문의하기', '이용약관'] },
-    { title: '소식', links: ['블로그', '업데이트', '채용'] },
+    { title: '소식', links: ['블로그', '업데이트'] },
   ]
 
   return (
@@ -12,7 +12,7 @@ export function Footer() {
           <div className="footer__logo">
             <div className="footer__mark">∞</div>
             <span className="footer__name">
-              <span className="footer__name--accent">mumu</span>class
+              <span className="footer__name--accent">무궁무진</span> 클래스
             </span>
           </div>
           <p className="footer__tagline">
@@ -34,7 +34,7 @@ export function Footer() {
       </div>
 
       <div className="footer__bottom">
-        © 2026 mumuclass. All rights reserved.
+        © 2026 무궁무진 클래스. All rights reserved.
       </div>
     </footer>
   )

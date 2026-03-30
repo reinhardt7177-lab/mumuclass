@@ -32,7 +32,7 @@ export function Nav() {
         <div className="nav__logo">
           <div className="nav__mark">∞</div>
           <span className="nav__name">
-            <span className="nav__name--accent">mumu</span>class
+            <span className="nav__name--accent">무궁무진</span> 클래스
           </span>
         </div>
       </Link>
