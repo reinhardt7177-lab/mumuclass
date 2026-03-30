@@ -57,7 +57,11 @@ export function PostModal({ onClose, onSuccess, useSupabase }) {
     // Supabase 연결 시 → DB에 저장
     if (useSupabase && supabase) {
       setLoading(true)
-      const { error: sbError } = await supabase.from('platform_posts').insert(postData)
+      const { data: inserted, error: sbError } = await supabase
+        .from('platform_posts')
+        .insert(postData)
+        .select()
+        .single()
       setLoading(false)
 
       if (sbError) {
@@ -65,7 +69,7 @@ export function PostModal({ onClose, onSuccess, useSupabase }) {
         return
       }
 
-      onSuccess?.(null)
+      onSuccess?.(inserted)
       onClose()
       return
     }

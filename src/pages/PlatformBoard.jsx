@@ -77,7 +77,7 @@ export function PlatformBoard() {
   const fetchPosts = useCallback(async () => {
     setLoading(true)
 
-    // Supabase 연결 시도
+    // Supabase 연결 시도 - 에러가 없으면 무조건 Supabase 모드 사용
     if (supabase) {
       try {
         const { data, error } = await supabase
@@ -85,14 +85,15 @@ export function PlatformBoard() {
           .select('*')
           .order('created_at', { ascending: false })
 
-        if (!error && data && data.length > 0) {
-          setPosts(data)
+        if (!error) {
+          // 데이터가 없어도(빈 테이블) Supabase 모드 유지
+          setPosts(data && data.length > 0 ? data : SEED_ITEMS)
           setUseSupabase(true)
           setLoading(false)
           return
         }
       } catch {
-        // Supabase 실패 → 로컬로 폴백
+        // Supabase 연결 실패 → 로컬로 폴백
       }
     }
 
@@ -292,8 +293,13 @@ export function PlatformBoard() {
         <PostModal
           onClose={() => setShowModal(false)}
           onSuccess={(newPost) => {
-            if (!useSupabase && newPost) {
-              addLocalPost(newPost)
+            if (newPost) {
+              // Supabase 반환값이든 로컬이든 즉시 목록에 추가
+              if (useSupabase) {
+                setPosts((prev) => [newPost, ...prev])
+              } else {
+                addLocalPost(newPost)
+              }
             } else {
               fetchPosts()
             }
