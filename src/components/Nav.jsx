@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 
 const links = [
   { path: '/story', label: '회사소개' },
+  { path: '/game-dev-team', label: '게임개발팀' },
   { path: '/ai-tech', label: 'AI 테크' },
   { path: '/community', label: '커뮤니티' },
   { path: '/shop', label: '교육상품' },

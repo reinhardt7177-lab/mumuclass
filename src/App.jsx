@@ -12,6 +12,7 @@ import PostDetail from './components/PostDetail'
 import Login from './components/Login'
 import CompanyStory from './components/CompanyStory'
 import AITechBoard from './components/AITechBoard'
+import GameDevTeam from './components/GameDevTeam'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -49,6 +50,9 @@ export default function App() {
           <Route path="/story" element={<CompanyStory />} />
           <Route path="/ai-tech" element={<AITechBoard />} />
           
+          {/* 게임 개발팀 구성 가이드 */}
+          <Route path="/game-dev-team" element={<GameDevTeam />} />
+
           {/* 앱 상세/등록은 로그인 필요 */}
           <Route path="/apps/create" element={
             <ProtectedRoute><CreateApp /></ProtectedRoute>

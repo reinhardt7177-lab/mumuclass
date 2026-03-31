@@ -1,0 +1,191 @@
+// 수업용 게임 앱 개발팀 구성 데이터
+
+export const TEAM_ROLES = [
+  {
+    id: 'pm',
+    title: '기획자 (PM)',
+    icon: '📋',
+    color: '#6C5CE7',
+    description: '게임의 전체 방향을 설계하고 팀을 이끄는 역할',
+    responsibilities: [
+      '게임 컨셉 및 기획서 작성',
+      '프로젝트 일정 관리',
+      '팀원 간 소통 조율',
+      '사용자 피드백 수집 및 반영',
+    ],
+    skills: ['아이디어 발상', '문서 작성', '리더십', '커뮤니케이션'],
+    recommended: '1명',
+  },
+  {
+    id: 'designer',
+    title: '디자이너 (UI/UX)',
+    icon: '🎨',
+    color: '#00B894',
+    description: '게임의 화면과 사용자 경험을 디자인하는 역할',
+    responsibilities: [
+      '게임 화면 레이아웃 설계',
+      '캐릭터 및 아이콘 디자인',
+      '색상 및 폰트 선정',
+      'UI 프로토타입 제작',
+    ],
+    skills: ['시각 디자인', '색채 감각', '창의력', 'Figma/Canva'],
+    recommended: '1~2명',
+  },
+  {
+    id: 'developer',
+    title: '개발자 (Developer)',
+    icon: '💻',
+    color: '#0984E3',
+    description: '게임을 실제로 코딩하고 구현하는 역할',
+    responsibilities: [
+      '게임 로직 구현 (바이브 코딩)',
+      'AI 도구를 활용한 코드 작성',
+      '버그 수정 및 최적화',
+      '기능 테스트 및 배포',
+    ],
+    skills: ['논리적 사고', 'AI 프롬프트 작성', '문제 해결', '바이브 코딩'],
+    recommended: '1~2명',
+  },
+  {
+    id: 'qa',
+    title: '테스터 (QA)',
+    icon: '🔍',
+    color: '#F39C12',
+    description: '게임을 직접 플레이하며 품질을 검증하는 역할',
+    responsibilities: [
+      '게임 플레이 테스트',
+      '버그 및 오류 리포트 작성',
+      '사용성 평가',
+      '개선 아이디어 제안',
+    ],
+    skills: ['꼼꼼함', '분석력', '보고서 작성', '사용자 관점'],
+    recommended: '1명',
+  },
+  {
+    id: 'sound',
+    title: '사운드/콘텐츠 담당',
+    icon: '🎵',
+    color: '#E17055',
+    description: '게임의 효과음, BGM, 스토리 등 콘텐츠를 제작하는 역할',
+    responsibilities: [
+      '배경음악 및 효과음 선정/제작',
+      '게임 스토리 및 대사 작성',
+      '튜토리얼 문구 작성',
+      '홍보 자료 제작',
+    ],
+    skills: ['스토리텔링', '음악 감각', '글쓰기', '영상 편집'],
+    recommended: '1명',
+  },
+]
+
+export const PROJECT_PHASES = [
+  {
+    phase: 1,
+    title: '아이디어 회의',
+    duration: '1차시',
+    icon: '💡',
+    tasks: [
+      '팀 이름 정하기',
+      '게임 장르 및 주제 선정',
+      '타겟 사용자 정하기 (학년, 과목)',
+      '핵심 재미 요소 브레인스토밍',
+    ],
+    deliverable: '게임 기획 아이디어 노트',
+  },
+  {
+    phase: 2,
+    title: '기획서 작성',
+    duration: '2차시',
+    icon: '📝',
+    tasks: [
+      '게임 규칙 및 흐름도 작성',
+      '화면 구성 스케치 (와이어프레임)',
+      '필요한 기능 목록 정리',
+      '역할 분담 확정',
+    ],
+    deliverable: '게임 기획서 (1페이지)',
+  },
+  {
+    phase: 3,
+    title: '디자인 & 개발',
+    duration: '3~5차시',
+    icon: '🛠️',
+    tasks: [
+      '화면 디자인 제작',
+      'AI 바이브 코딩으로 게임 구현',
+      '효과음/BGM 적용',
+      '중간 점검 및 피드백',
+    ],
+    deliverable: '게임 프로토타입 (플레이 가능)',
+  },
+  {
+    phase: 4,
+    title: '테스트 & 개선',
+    duration: '6차시',
+    icon: '🧪',
+    tasks: [
+      '다른 팀과 교차 테스트',
+      '버그 리포트 작성 및 수정',
+      '사용성 개선',
+      '최종 완성도 점검',
+    ],
+    deliverable: '테스트 리포트 & 수정된 게임',
+  },
+  {
+    phase: 5,
+    title: '발표 & 공유',
+    duration: '7차시',
+    icon: '🎤',
+    tasks: [
+      '발표 자료 준비',
+      '게임 시연 및 발표',
+      '상호 평가 (동료 평가)',
+      '무궁무진 클래스에 앱 등록',
+    ],
+    deliverable: '완성된 게임 앱 + 발표',
+  },
+]
+
+export const SAMPLE_TEAMS = [
+  {
+    name: '픽셀 히어로즈',
+    project: '구구단 어드벤처',
+    genre: '수학 RPG',
+    members: 5,
+    status: 'active',
+    progress: 65,
+  },
+  {
+    name: '코드 크래프터스',
+    project: '한글 타워 디펜스',
+    genre: '국어 전략',
+    members: 4,
+    status: 'active',
+    progress: 40,
+  },
+  {
+    name: '드림 팩토리',
+    project: '과학 실험 시뮬레이터',
+    genre: '과학 시뮬레이션',
+    members: 5,
+    status: 'planning',
+    progress: 15,
+  },
+  {
+    name: '버그 버스터즈',
+    project: '역사 퀴즈 배틀',
+    genre: '사회 퀴즈',
+    members: 4,
+    status: 'active',
+    progress: 80,
+  },
+]
+
+export const GAME_GENRES = [
+  { name: '퀴즈/퍼즐', icon: '🧩', desc: '문제를 풀며 학습하는 게임' },
+  { name: 'RPG/어드벤처', icon: '⚔️', desc: '스토리를 따라가며 미션 수행' },
+  { name: '시뮬레이션', icon: '🔬', desc: '실험이나 상황을 가상으로 체험' },
+  { name: '보드게임', icon: '🎲', desc: '전략과 운을 활용하는 게임' },
+  { name: '타이핑/액션', icon: '⌨️', desc: '빠른 반응과 정확성을 겨루는 게임' },
+  { name: '카드게임', icon: '🃏', desc: '카드를 수집하고 대결하는 게임' },
+]
