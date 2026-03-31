@@ -1542,418 +1542,749 @@ img { max-width: 100%; }
 /* ============================================================
    COMPANY STORY PAGE ??Premium Scrolling Landing
    ============================================================ */
-.story-page {
+/* ============================================================
+   STORYBOARD PAGE — Manga / Brutalism Style
+   ============================================================ */
+.sb-page {
   padding-top: 64px;
+  background: #0a0514;
+  overflow-x: hidden;
 }
 
-/* Scroll-reveal animation */
-.story-section {
-  opacity: 0;
-  transform: translateY(40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.story-section.story-visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* Hero */
-.story-hero {
+/* ── Scene Base ── */
+.sb-scene {
   position: relative;
-  min-height: 85vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   overflow: hidden;
-  background: linear-gradient(160deg, #0D0B14 0%, #1a1a2e 40%, #16213e 100%);
 }
 
-.story-hero__bg {
-  position: absolute;
-  inset: 0;
-  background:
-    radial-gradient(ellipse at 30% 20%, rgba(108, 92, 231, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 80%, rgba(0, 184, 148, 0.12) 0%, transparent 50%),
-    radial-gradient(ellipse at 50% 50%, rgba(243, 156, 18, 0.06) 0%, transparent 60%);
-  pointer-events: none;
-}
-
-.story-hero__content {
+.sb-panel {
   position: relative;
-  z-index: 1;
-  max-width: 700px;
-  padding: 2rem;
-}
-
-.story-hero__badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.4rem 1rem;
-  background: rgba(108, 92, 231, 0.15);
-  border: 1px solid rgba(108, 92, 231, 0.3);
-  color: var(--accent-light);
-  border-radius: 50px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin-bottom: 1.5rem;
-}
-
-.story-hero__badge-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  animation: pulse 2s infinite;
-}
-
-.story-hero__title {
-  font-size: clamp(2.5rem, 6vw, 4.5rem);
-  font-weight: 900;
-  line-height: 1.15;
-  color: white;
-  margin-bottom: 1.25rem;
-  letter-spacing: -1px;
-}
-
-.story-hero__gradient {
-  background: linear-gradient(135deg, var(--accent-light), #00B894);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.story-hero__desc {
-  font-size: 1.1rem;
-  line-height: 1.7;
-  color: rgba(255, 255, 255, 0.7);
-  margin-bottom: 2rem;
-}
-
-.story-hero__desc strong {
-  color: white;
-}
-
-.story-hero__scroll-hint {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  color: rgba(255, 255, 255, 0.35);
-  font-size: 0.8rem;
-  animation: floatDown 2s ease-in-out infinite;
+  gap: 2.5rem;
+  z-index: 2;
 }
 
-.story-hero__scroll-hint span:first-child {
-  font-size: 1.5rem;
-}
-
-@keyframes floatDown {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(8px); }
-}
-
-/* Sections generic */
-.story-section__inner {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 5rem 2rem;
-}
-
-.story-section__label {
-  display: inline-block;
+/* Scene tag labels */
+.sb-scene-tag {
+  position: absolute;
+  top: 1.5rem;
+  left: 2rem;
+  font-family: monospace;
   font-size: 0.7rem;
-  font-weight: 800;
-  letter-spacing: 2px;
-  color: var(--accent);
-  text-transform: uppercase;
-  background: var(--accent-bg);
-  padding: 0.3rem 0.8rem;
-  border-radius: 50px;
-  margin-bottom: 1rem;
-}
-
-.story-section__title {
-  font-size: clamp(1.5rem, 3vw, 2.25rem);
-  font-weight: 800;
-  line-height: 1.3;
-  color: var(--text-primary);
-  margin-bottom: 1rem;
-}
-
-.story-accent {
-  color: var(--accent);
-}
-
-.story-section__desc {
-  font-size: 1.05rem;
-  line-height: 1.8;
-  color: var(--text-secondary);
-  max-width: 680px;
-}
-
-/* Mission */
-.story-mission {
-  background: white;
-  border-bottom: 1px solid var(--border);
-}
-
-/* Stats */
-.story-stats {
-  background: linear-gradient(135deg, #0D0B14, #1a1a2e);
-}
-
-.story-stats__grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.5rem;
-}
-
-.story-stat-card {
-  text-align: center;
-  padding: 2rem 1rem;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-lg);
-  transition: transform 0.3s, border-color 0.3s;
-}
-
-.story-stat-card:hover {
-  transform: translateY(-4px);
-  border-color: var(--accent);
-}
-
-.story-stat-card__icon {
-  font-size: 2rem;
-  margin-bottom: 0.75rem;
-  display: block;
-}
-
-.story-stat-card__number {
-  font-size: 2rem;
   font-weight: 900;
-  color: white;
-  display: block;
-  margin-bottom: 0.25rem;
+  letter-spacing: 4px;
+  color: rgba(255,255,255,0.2);
+  text-transform: uppercase;
+  z-index: 5;
 }
 
-.story-stat-card__label {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.6);
+.sb-scene-title-tag {
+  position: absolute;
+  top: 1.5rem;
+  right: 2rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #ff4757;
+  background: rgba(255,71,87,0.1);
+  border: 2px solid #ff4757;
+  padding: 0.25rem 0.8rem;
+  z-index: 5;
 }
 
-/* Values */
-.story-values__grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.25rem;
-  margin-top: 2rem;
+/* ── Copywriting Blocks ── */
+.sb-copy {
+  text-align: center;
+  max-width: 700px;
 }
 
-.story-value-card {
-  padding: 2rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s;
-}
-
-.story-value-card:hover {
-  border-color: var(--accent-light);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
-}
-
-.story-value-card__icon {
-  font-size: 2rem;
+.sb-copy__main {
+  font-size: clamp(1.6rem, 4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.3;
+  color: #fff;
+  text-shadow: 3px 3px 0 #000, -1px -1px 0 #000;
+  letter-spacing: -0.5px;
   margin-bottom: 0.75rem;
-  display: block;
 }
 
-.story-value-card__title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  color: var(--text-primary);
+.sb-copy__sub {
+  font-size: 1rem;
+  color: rgba(255,255,255,0.6);
+  line-height: 1.7;
 }
 
-.story-value-card__desc {
-  font-size: 0.9rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
+.sb-copy--final .sb-copy__main {
+  background: linear-gradient(135deg, #ff4757, #ffa502, #ff6348);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
 }
 
-/* Timeline */
-.story-timeline-section {
-  background: var(--bg);
+/* ════════════════════════════════════════════
+   SCENE 1 — Clash of Heroes
+   ════════════════════════════════════════════ */
+.sb-scene1 {
+  background:
+    radial-gradient(ellipse at 30% 50%, rgba(255,71,87,0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 50%, rgba(108,92,231,0.15) 0%, transparent 50%),
+    linear-gradient(180deg, #0a0514 0%, #1a0a2e 100%);
 }
 
-.story-timeline {
-  position: relative;
-  margin-top: 2.5rem;
-  padding-left: 2rem;
-}
-
-.story-timeline::before {
+/* Speed lines overlay */
+.sb-scene1::before {
   content: '';
   position: absolute;
-  left: 0.75rem;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: linear-gradient(180deg, var(--accent), var(--green));
-  border-radius: 2px;
-}
-
-.story-timeline__item {
-  position: relative;
-  margin-bottom: 2.5rem;
-  padding-left: 1.5rem;
-}
-
-.story-timeline__dot {
-  position: absolute;
-  left: -1.65rem;
-  top: 0.2rem;
-  width: 32px;
-  height: 32px;
-  background: var(--bg-card);
-  border: 2px solid var(--accent);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.9rem;
+  inset: 0;
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    transparent 0deg 8deg,
+    rgba(255,255,255,0.02) 8deg 10deg
+  );
+  pointer-events: none;
   z-index: 1;
 }
 
-.story-timeline__card {
-  padding: 1.25rem 1.5rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  transition: all 0.3s;
-}
-
-.story-timeline__card:hover {
-  border-color: var(--accent-light);
-  box-shadow: var(--shadow-md);
-}
-
-.story-timeline__year {
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--accent);
-  background: var(--accent-bg);
-  padding: 0.15rem 0.5rem;
-  border-radius: 4px;
-  display: inline-block;
-  margin-bottom: 0.5rem;
-}
-
-.story-timeline__title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin-bottom: 0.35rem;
-  color: var(--text-primary);
-}
-
-.story-timeline__desc {
-  font-size: 0.88rem;
-  color: var(--text-secondary);
-  line-height: 1.6;
-}
-
-/* Team */
-.story-team__grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.25rem;
-  margin-top: 2rem;
-}
-
-.story-team-card {
-  text-align: center;
-  padding: 2rem 1rem;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  transition: all 0.3s;
-}
-
-.story-team-card:hover {
-  border-color: var(--accent-light);
-  box-shadow: var(--shadow-md);
-  transform: translateY(-3px);
-}
-
-.story-team-card__emoji {
-  font-size: 2.5rem;
-  display: block;
-  margin-bottom: 0.75rem;
-}
-
-.story-team-card__name {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.2rem;
-}
-
-.story-team-card__role {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--accent);
-  display: block;
-  margin-bottom: 0.5rem;
-}
-
-.story-team-card__desc {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
-}
-
-/* CTA */
-.story-cta {
-  background: linear-gradient(135deg, #F0EDFF 0%, #E8FFF5 50%, #FFF8E1 100%);
-}
-
-.story-cta__title {
-  font-size: 1.75rem;
-  font-weight: 800;
-  margin-bottom: 0.75rem;
-  color: var(--text-primary);
-}
-
-.story-cta__desc {
-  font-size: 1rem;
-  color: var(--text-secondary);
-  line-height: 1.7;
-  margin-bottom: 2rem;
-}
-
-.story-cta__buttons {
+.sb-scene1__arena {
   display: flex;
-  gap: 0.75rem;
+  align-items: center;
   justify-content: center;
+  gap: 2rem;
+  width: 100%;
   flex-wrap: wrap;
 }
 
-/* Story Responsive */
+/* Character Cards */
+.sb-char-card {
+  background: rgba(255,255,255,0.03);
+  border: 3px solid #fff;
+  padding: 1.5rem;
+  max-width: 280px;
+  text-align: center;
+  position: relative;
+  box-shadow: 6px 6px 0 rgba(0,0,0,0.6);
+}
+
+.sb-char-card::before {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2px dashed rgba(255,255,255,0.1);
+  pointer-events: none;
+}
+
+.sb-char-card__portrait {
+  width: 100px;
+  height: 100px;
+  margin: 0 auto 1rem;
+  border: 4px solid;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.sb-char-card__portrait--junyong {
+  border-color: #ff4757;
+  background: linear-gradient(135deg, #2d1b1b, #4a1a1a);
+  box-shadow: 0 0 20px rgba(255,71,87,0.4);
+}
+
+.sb-char-card__portrait--yongsam {
+  border-color: #6c5ce7;
+  background: linear-gradient(135deg, #1b1b2d, #1a1a4a);
+  box-shadow: 0 0 20px rgba(108,92,231,0.4);
+}
+
+.sb-char-emoji {
+  font-size: 3rem;
+}
+
+.sb-char-card__info h3 {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: #fff;
+  margin-bottom: 0.25rem;
+}
+
+.sb-char-card__role {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  padding: 0.2rem 0.6rem;
+  background: #ff4757;
+  color: #fff;
+  margin-bottom: 0.75rem;
+}
+
+.char-right .sb-char-card__role {
+  background: #6c5ce7;
+}
+
+.sb-char-card__abilities {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.sb-ability {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #ffa502;
+  background: rgba(255,165,2,0.1);
+  border: 1px solid rgba(255,165,2,0.3);
+  padding: 0.2rem 0.5rem;
+  font-family: monospace;
+}
+
+/* Clash FX */
+.clash-fx {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 3;
+}
+
+.clash-fx__bolt {
+  font-size: 2.5rem;
+  animation: boltFlash 0.8s ease-in-out infinite alternate;
+}
+
+.clash-fx__text {
+  font-size: 3rem;
+  font-weight: 900;
+  color: #ff4757;
+  text-shadow: 0 0 20px rgba(255,71,87,0.8), 3px 3px 0 #000;
+  font-style: italic;
+}
+
+@keyframes boltFlash {
+  0% { transform: scale(1); filter: brightness(1); }
+  100% { transform: scale(1.3); filter: brightness(1.5); }
+}
+
+/* ════════════════════════════════════════════
+   SCENE 2 — Oath on the Rooftop
+   ════════════════════════════════════════════ */
+.sb-scene2 {
+  background: linear-gradient(180deg, #1a0a2e 0%, #2d1b4e 40%, #ff6348 80%, #ffa502 100%);
+}
+
+.scene2-aura {
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,165,2,0.3) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.handshake-zoom {
+  position: relative;
+}
+
+.sb-handshake {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-handshake__emoji {
+  font-size: 6rem;
+  filter: drop-shadow(0 0 30px rgba(255,165,2,0.6));
+  position: relative;
+  z-index: 2;
+}
+
+.sb-handshake__shockwave {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid rgba(255,255,255,0.3);
+  animation: shockwave 2s ease-out infinite;
+}
+
+.sb-handshake__shockwave--2 {
+  animation-delay: 1s;
+}
+
+@keyframes shockwave {
+  0% { transform: scale(0.5); opacity: 1; }
+  100% { transform: scale(4); opacity: 0; }
+}
+
+/* Speech Bubbles */
+.sb-speech-row {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%;
+}
+
+.speech-bubble {
+  position: relative;
+  max-width: 320px;
+  padding: 1.25rem 1.5rem;
+  background: #fff;
+  color: #1a1a2e;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1.5;
+  border: 3px solid #000;
+  box-shadow: 4px 4px 0 #000;
+}
+
+.speech-bubble--left {
+  border-radius: 20px 20px 20px 4px;
+}
+
+.speech-bubble--right {
+  border-radius: 20px 20px 4px 20px;
+}
+
+.speech-bubble__name {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 1px;
+  color: #ff4757;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+}
+
+.speech-bubble--right .speech-bubble__name {
+  color: #6c5ce7;
+}
+
+/* ════════════════════════════════════════════
+   SCENE 3 — The Crucible
+   ════════════════════════════════════════════ */
+.sb-scene3 {
+  background: linear-gradient(180deg, #0a0514 0%, #0d1117 50%, #0a0514 100%);
+}
+
+/* Monitor glow effect */
+.sb-scene3::before {
+  content: '';
+  position: absolute;
+  width: 300px;
+  height: 200px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(ellipse, rgba(100,200,255,0.15) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sb-marquee-zone {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  width: 100%;
+}
+
+.hash-tag {
+  font-size: clamp(1.2rem, 3vw, 2rem);
+  font-weight: 900;
+  padding: 0.5rem 1rem;
+  border: 3px solid;
+  display: inline-block;
+  white-space: nowrap;
+  transform: rotate(var(--r, 0deg));
+}
+
+.hash-tag--1 { color: #ff4757; border-color: #ff4757; --r: -3deg; }
+.hash-tag--2 { color: #ffa502; border-color: #ffa502; --r: 2deg; }
+.hash-tag--3 { color: #2ed573; border-color: #2ed573; --r: -1deg; }
+.hash-tag--4 { color: #1e90ff; border-color: #1e90ff; --r: 3deg; }
+.hash-tag--5 { color: #ff6348; border-color: #ff6348; --r: -2deg; }
+.hash-tag--6 { color: #a29bfe; border-color: #a29bfe; --r: 1deg; }
+
+/* Debate Visual */
+.debate-visual {
+  width: 100%;
+}
+
+.sb-debate-scene {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.sb-debater {
+  position: relative;
+  font-size: 3rem;
+  padding: 1.5rem;
+  border: 3px solid rgba(255,255,255,0.3);
+  background: rgba(255,255,255,0.03);
+}
+
+.sb-debater--left { border-color: #ff4757; }
+.sb-debater--right { border-color: #6c5ce7; }
+
+.sb-debate-sparks {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 1.5rem;
+  animation: sparkPulse 0.6s ease-in-out infinite alternate;
+}
+
+@keyframes sparkPulse {
+  0% { transform: scale(1) rotate(0deg); }
+  100% { transform: scale(1.3) rotate(15deg); }
+}
+
+.sb-debate-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  animation: notesFloat 3s ease-in-out infinite;
+}
+
+@keyframes notesFloat {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-10px) rotate(5deg); }
+  75% { transform: translateY(10px) rotate(-5deg); }
+}
+
+/* ════════════════════════════════════════════
+   SCENE 4 — DISCO World
+   ════════════════════════════════════════════ */
+.sb-scene4 {
+  --scene4-bg: 0;
+  background: linear-gradient(180deg,
+    rgba(10,5,20, calc(1 - var(--scene4-bg))) 0%,
+    rgba(108,92,231, calc(var(--scene4-bg) * 0.3)) 50%,
+    rgba(255,99,72, calc(var(--scene4-bg) * 0.2)) 100%
+  );
+  transition: background 0.3s;
+}
+
+.disco-sphere {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.disco-sphere__core {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #a29bfe, #6c5ce7 40%, #2d1b4e 80%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 60px rgba(108,92,231,0.6), 0 0 120px rgba(108,92,231,0.3);
+  position: relative;
+  z-index: 2;
+}
+
+.disco-sphere__hologram {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+  font-size: 1.5rem;
+  animation: holoSpin 10s linear infinite;
+}
+
+@keyframes holoSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.disco-sphere__ring {
+  position: absolute;
+  width: 280px;
+  height: 280px;
+  border-radius: 50%;
+  border: 2px solid rgba(162,155,254,0.3);
+  animation: ringPulse 3s ease-in-out infinite;
+}
+
+.disco-sphere__ring--2 {
+  width: 360px;
+  height: 360px;
+  border-color: rgba(255,165,2,0.2);
+  animation-delay: 1.5s;
+}
+
+@keyframes ringPulse {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* ════════════════════════════════════════════
+   SCENE 5 — Final: MumuClass Arrives
+   ════════════════════════════════════════════ */
+.sb-scene5 {
+  background: #0a0514;
+  min-height: 110vh;
+}
+
+.sb-matrix-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Hero duo */
+.hero-pose {
+  position: relative;
+  z-index: 2;
+}
+
+.sb-hero-duo {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-end;
+}
+
+.sb-hero-figure {
+  text-align: center;
+  position: relative;
+}
+
+.sb-hero-figure__emoji {
+  font-size: 5rem;
+  display: block;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 0 20px rgba(255,255,255,0.3));
+}
+
+.sb-hero-figure--junyong .sb-hero-figure__emoji {
+  filter: drop-shadow(0 0 20px rgba(255,71,87,0.5));
+}
+
+.sb-hero-figure--yongsam .sb-hero-figure__emoji {
+  filter: drop-shadow(0 0 20px rgba(108,92,231,0.5));
+}
+
+.sb-hero-figure__apps {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  padding: 0.5rem;
+  border: 2px solid rgba(255,71,87,0.4);
+  background: rgba(255,71,87,0.05);
+  animation: appsGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes appsGlow {
+  0% { box-shadow: 0 0 10px rgba(255,71,87,0.2); }
+  100% { box-shadow: 0 0 30px rgba(255,71,87,0.5); }
+}
+
+.sb-hero-figure__code-stream {
+  font-family: monospace;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #00ff88;
+  padding: 0.5rem;
+  border: 2px solid rgba(0,255,136,0.4);
+  background: rgba(0,255,136,0.05);
+  letter-spacing: 2px;
+  animation: codeGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes codeGlow {
+  0% { box-shadow: 0 0 10px rgba(0,255,136,0.2); }
+  100% { box-shadow: 0 0 30px rgba(0,255,136,0.5); }
+}
+
+/* Logo Final */
+.mumu-logo-final {
+  text-align: center;
+  position: relative;
+  z-index: 3;
+}
+
+.mumu-logo-final__text {
+  font-size: clamp(3rem, 8vw, 6rem);
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffd700, #ffa502, #ff6348, #ff4757);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 40px rgba(255,165,2,0.4));
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.mumu-logo-final__tagline {
+  font-size: 1rem;
+  font-weight: 800;
+  letter-spacing: 10px;
+  color: rgba(255,255,255,0.4);
+  text-transform: uppercase;
+}
+
+/* CTA Button */
+.sb-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.2rem 2.5rem;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #fff;
+  background: linear-gradient(135deg, #ff4757, #ff6348);
+  border: 4px solid #fff;
+  text-decoration: none;
+  cursor: pointer;
+  position: relative;
+  z-index: 5;
+  box-shadow: 6px 6px 0 #000;
+  transition: all 0.2s;
+  animation: ctaPulse 2s ease-in-out infinite;
+}
+
+.sb-cta-btn:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: 8px 8px 0 #000;
+  background: linear-gradient(135deg, #ff6348, #ffa502);
+}
+
+.sb-cta-btn__arrow {
+  font-size: 1.3rem;
+  transition: transform 0.2s;
+}
+
+.sb-cta-btn:hover .sb-cta-btn__arrow {
+  transform: translateX(4px);
+}
+
+@keyframes ctaPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+/* ════════════════════════════════════════════
+   STORYBOARD RESPONSIVE
+   ════════════════════════════════════════════ */
 @media (max-width: 768px) {
-  .story-hero { min-height: 70vh; }
-  .story-stats__grid { grid-template-columns: repeat(2, 1fr); }
-  .story-values__grid { grid-template-columns: 1fr; }
-  .story-team__grid { grid-template-columns: repeat(2, 1fr); }
-  .story-section__inner { padding: 3rem 1.5rem; }
+  .sb-panel {
+    padding: 3rem 1.25rem;
+    gap: 2rem;
+  }
+
+  .sb-scene1__arena {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+
+  .sb-char-card {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .clash-fx__text {
+    font-size: 2rem;
+  }
+
+  .sb-speech-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .speech-bubble {
+    max-width: 100%;
+  }
+
+  .sb-handshake__emoji {
+    font-size: 4rem;
+  }
+
+  .disco-sphere__core {
+    width: 150px;
+    height: 150px;
+  }
+
+  .disco-sphere__ring {
+    width: 210px;
+    height: 210px;
+  }
+
+  .disco-sphere__ring--2 {
+    width: 270px;
+    height: 270px;
+  }
+
+  .sb-hero-duo {
+    gap: 1.5rem;
+  }
+
+  .sb-hero-figure__emoji {
+    font-size: 3.5rem;
+  }
+
+  .sb-cta-btn {
+    padding: 1rem 1.5rem;
+    font-size: 0.95rem;
+  }
+
+  .hash-tag {
+    font-size: 1rem;
+    padding: 0.3rem 0.7rem;
+  }
+
+  .sb-scene-tag,
+  .sb-scene-title-tag {
+    position: relative;
+    top: auto;
+    left: auto;
+    right: auto;
+    display: inline-block;
+    margin: 0 0.25rem;
+  }
 }
 
 @media (max-width: 480px) {
-  .story-stats__grid { grid-template-columns: 1fr; }
-  .story-team__grid { grid-template-columns: 1fr; }
+  .sb-copy__main {
+    font-size: 1.3rem;
+  }
+
+  .mumu-logo-final__text {
+    font-size: 2.5rem;
+  }
+
+  .sb-debater {
+    font-size: 2rem;
+    padding: 1rem;
+  }
+
+  .sb-hero-duo {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
 }
 
 
