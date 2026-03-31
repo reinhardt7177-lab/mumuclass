@@ -96,7 +96,7 @@ const DEMO_APPS = [
     one_line_desc: '삼국시대부터 현대까지! 시대별 역사 퀴즈로 시간 여행을 떠나세요',
     category: '에듀테크',
     screenshot_url: '/demo-apps/history.png',
-    preview_url: 'https://www.britannica.com',
+    preview_url: '/apps/history-quiz',
     rating: 4.4,
     creator_name: '송태호 선생님',
     creator_email: 'demo@mumuclass.kr',

@@ -12,6 +12,7 @@ import PostDetail from './components/PostDetail'
 import Login from './components/Login'
 import CompanyStory from './components/CompanyStory'
 import AITechBoard from './components/AITechBoard'
+import HistoryQuizGame from './pages/HistoryQuizGame'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -53,6 +54,7 @@ export default function App() {
           <Route path="/apps/create" element={
             <ProtectedRoute><CreateApp /></ProtectedRoute>
           } />
+          <Route path="/apps/history-quiz" element={<HistoryQuizGame />} />
           <Route path="/apps/:id" element={<AppDetail />} />
           
           <Route path="/shop" element={
