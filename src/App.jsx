@@ -10,6 +10,8 @@ import CommunityBoard from './components/CommunityBoard'
 import CreatePost from './components/CreatePost'
 import PostDetail from './components/PostDetail'
 import Login from './components/Login'
+import CompanyStory from './components/CompanyStory'
+import AITechBoard from './components/AITechBoard'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -42,6 +44,10 @@ export default function App() {
           {/* 메인 홈 = 앱 게시판 (누구나 구경 가능) */}
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
+          
+          {/* 회사 스토리 & AI 테크 (누구나 접근 가능) */}
+          <Route path="/story" element={<CompanyStory />} />
+          <Route path="/ai-tech" element={<AITechBoard />} />
           
           {/* 앱 상세/등록은 로그인 필요 */}
           <Route path="/apps/create" element={
