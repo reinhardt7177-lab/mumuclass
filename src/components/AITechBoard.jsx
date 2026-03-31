@@ -87,6 +87,14 @@ const AI_ARTICLES = [
 
 const CATEGORIES = ['전체', 'LLM', 'AI Agent', 'AI 도구', '에듀테크', '바이브 코딩']
 
+const CAT_CLASSES = {
+  'LLM': 'llm',
+  'AI Agent': 'aiagent',
+  'AI 도구': 'aitool',
+  '에듀테크': 'edutech',
+  '바이브 코딩': 'vibecoding'
+}
+
 export default function AITechBoard() {
   const [activeCategory, setActiveCategory] = useState('전체')
   const [search, setSearch] = useState('')
@@ -164,7 +172,7 @@ export default function AITechBoard() {
                 <article key={article.id} className="aitech-item">
                   <div className="aitech-item__left">
                     <div className="aitech-item__top-row">
-                      <span className={`aitech-item__category aitech-item__category--${article.category.replace(/\s/g, '')}`}>
+                      <span className={`aitech-item__category aitech-item__category--${CAT_CLASSES[article.category] || 'default'}`}>
                         {article.category}
                       </span>
                       {article.hot && <span className="aitech-item__hot">🔥 HOT</span>}

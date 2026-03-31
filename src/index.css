@@ -2185,11 +2185,11 @@ img { max-width: 100%; }
   color: var(--accent);
 }
 
-.aitech-item__category--LLM { background: rgba(243, 156, 18, 0.1); color: #E67E22; }
-.aitech-item__category--AIAgent { background: rgba(108, 92, 231, 0.1); color: var(--accent); }
-.aitech-item__category--AI?꾧뎄 { background: rgba(0, 184, 148, 0.1); color: var(--green); }
-.aitech-item__category--?먮??뚰겕 { background: rgba(52, 152, 219, 0.1); color: #2980B9; }
-.aitech-item__category--諛붿씠釉뚯퐫??{ background: rgba(231, 76, 60, 0.08); color: #E74C3C; }
+.aitech-item__category--llm { background: rgba(243, 156, 18, 0.1); color: #E67E22; }
+.aitech-item__category--aiagent { background: rgba(108, 92, 231, 0.1); color: var(--accent); }
+.aitech-item__category--aitool { background: rgba(0, 184, 148, 0.1); color: var(--green); }
+.aitech-item__category--edutech { background: rgba(52, 152, 219, 0.1); color: #2980B9; }
+.aitech-item__category--vibecoding { background: rgba(231, 76, 60, 0.08); color: #E74C3C; }
 
 .aitech-item__hot {
   font-size: 0.6rem;
