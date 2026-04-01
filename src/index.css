@@ -1466,8 +1466,8 @@ img { max-width: 100%; }
 .retro-nav__item:hover { background: #555; color: white; }
 .retro-nav__item--active { background: #f8f9fa; color: #d35400; border-bottom: 2px solid #d35400; }
 /* 업로드 버튼 – 탭바 맨 오른쪽 */
-.retro-nav__upload { flex: 0 0 auto; display: flex; align-items: center; padding: 0 1.1rem; height: 100%; color: #f39c12; font-size: 0.82rem; font-weight: 800; background: #2a2a2a; border: none; border-left: 2px solid #f39c12; cursor: pointer; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; white-space: nowrap; }
-.retro-nav__upload:hover { background: #f39c12; color: #1a1a1a; }
+.retro-nav__upload { flex: 0 0 auto; display: flex; align-items: center; padding: 0.6rem 1.2rem; height: 100%; color: #00ffe7; font-size: 0.85rem; font-weight: 800; background: transparent; border: none; border-left: 1px solid #555; cursor: pointer; letter-spacing: 0.04em; white-space: nowrap; text-shadow: 0 0 6px #00ffe7, 0 0 14px #00ffe7; transition: text-shadow 0.2s, background 0.15s; }
+.retro-nav__upload:hover { background: rgba(0,255,231,0.1); text-shadow: 0 0 8px #00ffe7, 0 0 20px #00ffe7, 0 0 36px #00ffe7; }
 
 /* ── 업로드 모달 ── */
 .upload-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(5px); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1rem; }
