@@ -1460,13 +1460,13 @@ img { max-width: 100%; }
 .retro-topbar__inner { display: flex; align-items: center; gap: 1rem; }
 .retro-topbar__brand { font-family: 'Arial Black', sans-serif; font-size: 1.5rem; font-weight: 900; color: #f39c12; text-shadow: 2px 2px 0 #000; letter-spacing: -1px; }
 .retro-topbar__sub { font-size: 0.85rem; color: #ccc; border-left: 1px solid #555; padding-left: 1rem; }
-.retro-nav { display: flex; align-items: stretch; background: #3e3e3e; border-bottom: 1px solid #222; overflow: hidden; }
-.retro-nav__tabs { display: flex; flex: 1; overflow-x: auto; min-width: 0; }
+.retro-nav { display: flex; align-items: stretch; background: #3e3e3e; border-bottom: 1px solid #222; }
+.retro-nav__tabs { display: flex; flex: 1 1 0; overflow-x: auto; min-width: 0; }
 .retro-nav__item { padding: 0.6rem 1.2rem; color: #ddd; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; border-right: 1px solid #555; cursor: pointer; white-space: nowrap; }
 .retro-nav__item:hover { background: #555; color: white; }
 .retro-nav__item--active { background: #f8f9fa; color: #d35400; border-bottom: 2px solid #d35400; }
 /* 업로드 버튼 – 탭바 맨 오른쪽 */
-.retro-nav__upload { flex-shrink: 0; padding: 0 1.1rem; color: #f39c12; font-size: 0.82rem; font-weight: 800; background: transparent; border: none; border-left: 2px solid #555; cursor: pointer; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+.retro-nav__upload { flex: 0 0 auto; display: flex; align-items: center; padding: 0 1.1rem; height: 100%; color: #f39c12; font-size: 0.82rem; font-weight: 800; background: #2a2a2a; border: none; border-left: 2px solid #f39c12; cursor: pointer; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; white-space: nowrap; }
 .retro-nav__upload:hover { background: #f39c12; color: #1a1a1a; }
 
 /* ── 업로드 모달 ── */
