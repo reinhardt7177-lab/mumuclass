@@ -1460,10 +1460,39 @@ img { max-width: 100%; }
 .retro-topbar__inner { display: flex; align-items: center; gap: 1rem; }
 .retro-topbar__brand { font-family: 'Arial Black', sans-serif; font-size: 1.5rem; font-weight: 900; color: #f39c12; text-shadow: 2px 2px 0 #000; letter-spacing: -1px; }
 .retro-topbar__sub { font-size: 0.85rem; color: #ccc; border-left: 1px solid #555; padding-left: 1rem; }
-.retro-nav { display: flex; background: #3e3e3e; border-bottom: 1px solid #222; overflow-x: auto; white-space: nowrap; }
-.retro-nav__item { padding: 0.6rem 1.2rem; color: #ddd; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; border-right: 1px solid #555; cursor: pointer; }
+.retro-nav { display: flex; align-items: stretch; background: #3e3e3e; border-bottom: 1px solid #222; }
+.retro-nav__tabs { display: flex; flex: 1 1 0; overflow-x: auto; min-width: 0; }
+.retro-nav__item { padding: 0.6rem 1.2rem; color: #ddd; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; border-right: 1px solid #555; cursor: pointer; white-space: nowrap; }
 .retro-nav__item:hover { background: #555; color: white; }
 .retro-nav__item--active { background: #f8f9fa; color: #d35400; border-bottom: 2px solid #d35400; }
+/* 업로드 버튼 – 탭바 맨 오른쪽 */
+.retro-nav__upload { flex: 0 0 auto; display: flex; align-items: center; padding: 0 1.1rem; height: 100%; color: #f39c12; font-size: 0.82rem; font-weight: 800; background: #2a2a2a; border: none; border-left: 2px solid #f39c12; cursor: pointer; letter-spacing: 0.04em; transition: background 0.15s, color 0.15s; white-space: nowrap; }
+.retro-nav__upload:hover { background: #f39c12; color: #1a1a1a; }
+
+/* ── 업로드 모달 ── */
+.upload-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(5px); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1rem; }
+.upload-modal { background: #1a1a2e; border: 2px solid #f39c12; border-radius: 4px; padding: 2rem; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; position: relative; box-shadow: 0 0 40px rgba(243,156,18,0.25), 4px 4px 0 #000; }
+.upload-modal__close { position: absolute; top: 0.75rem; right: 0.75rem; background: transparent; border: 1px solid #555; color: #aaa; width: 28px; height: 28px; border-radius: 3px; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+.upload-modal__close:hover { background: #333; color: #fff; }
+.upload-modal__header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 1.5rem; }
+.upload-modal__pixel { display: inline-block; width: 10px; height: 10px; background: #f39c12; box-shadow: 4px 0 0 #e67e22, -4px 0 0 #f1c40f; }
+.upload-modal__title { font-size: 1.1rem; font-weight: 900; color: #f39c12; letter-spacing: 0.06em; text-transform: uppercase; }
+.upload-alert { padding: 0.6rem 0.9rem; border-radius: 3px; font-size: 0.82rem; margin-bottom: 1rem; }
+.upload-alert--success { background: rgba(0,184,148,0.12); border: 1px solid #00b894; color: #55efc4; }
+.upload-alert--error { background: rgba(231,76,60,0.12); border: 1px solid #e74c3c; color: #ff7675; }
+.upload-field { margin-bottom: 1rem; }
+.upload-label { display: block; font-size: 0.75rem; font-weight: 700; color: #f39c12; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 0.35rem; }
+.upload-label span { color: #e74c3c; margin-left: 2px; }
+.upload-input, .upload-select { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 3px; color: #e0daf0; font-size: 0.87rem; padding: 0.55rem 0.8rem; font-family: inherit; outline: none; transition: border-color 0.2s; }
+.upload-input:focus, .upload-select:focus { border-color: #f39c12; box-shadow: 0 0 0 2px rgba(243,156,18,0.15); }
+.upload-input::placeholder { color: #555; }
+.upload-select { appearance: none; cursor: pointer; }
+.upload-select option { background: #1a1a2e; color: #e0daf0; }
+.upload-hint { display: block; font-size: 0.7rem; color: #666; margin-top: 0.3rem; }
+.upload-submit { width: 100%; background: #f39c12; color: #1a1a1a; border: none; padding: 0.75rem; border-radius: 3px; font-weight: 900; font-size: 0.9rem; cursor: pointer; margin-top: 0.5rem; letter-spacing: 0.05em; box-shadow: 3px 3px 0 #c0392b; transition: transform 0.1s, box-shadow 0.1s; }
+.upload-submit:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #c0392b; }
+.upload-submit:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #c0392b; }
+.upload-submit:disabled { opacity: 0.5; cursor: not-allowed; }
 .retro-content { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
 .retro-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem 1rem; }
 @media (max-width: 900px) { .retro-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem 1rem; } }

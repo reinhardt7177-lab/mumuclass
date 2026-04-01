@@ -12,6 +12,7 @@ import PostDetail from './components/PostDetail'
 import Login from './components/Login'
 import CompanyStory from './components/CompanyStory'
 import AITechBoard from './components/AITechBoard'
+import AppGallery from './components/AppGallery'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -68,6 +69,9 @@ export default function App() {
           } />
           <Route path="/community/:id" element={
             <ProtectedRoute><PostDetail /></ProtectedRoute>
+          } />
+          <Route path="/gallery" element={
+            <ProtectedRoute><AppGallery /></ProtectedRoute>
           } />
         </Routes>
       </AuthProvider>
