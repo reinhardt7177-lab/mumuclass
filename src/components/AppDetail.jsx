@@ -189,7 +189,8 @@ export default function AppDetail() {
   const handleDeleteApp = async () => {
     if (!confirm('정말 이 앱을 삭제하시겠습니까?')) return
     const { error } = await supabase.from('apps').delete().eq('id', id)
-    if (!error) navigate('/') else alert(`삭제 실패: ${error.message}`)
+    if (!error) navigate('/')
+    else alert(`삭제 실패: ${error.message}`)
   }
 
   const toggleFullscreen = () => {
