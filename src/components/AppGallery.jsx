@@ -44,6 +44,26 @@ const EMPTY_FORM = {
 const toThumbUrl = (url) =>
   url ? `https://image.thum.io/get/width/640/${url}` : ''
 
+function ThumbImg({ src, alt }) {
+  const [ready, setReady] = useState(false)
+  const isThum = src?.includes('thum.io')
+
+  useEffect(() => {
+    if (!isThum) { setReady(true); return }
+    const t = setTimeout(() => setReady(true), 10000)
+    return () => clearTimeout(t)
+  }, [src, isThum])
+
+  if (!src) return null
+  if (!ready) return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.3)', gap:'0.4rem' }}>
+      <div className="gallery-spinner" style={{ width:20, height:20 }} />
+      <span style={{ fontSize:'0.65rem', color:'#4b4466' }}>생성 중...</span>
+    </div>
+  )
+  return <img src={src} alt={alt} loading="lazy" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+}
+
 /* ── 스피너 ── */
 function Spinner({ size = 24 }) {
   return (
@@ -60,7 +80,7 @@ function AppCard({ app, onClick }) {
     <div className="gallery-card" onClick={() => onClick(app)}>
       <div className="gallery-card__thumb">
         {app.thumbnail_url ? (
-          <img src={app.thumbnail_url} alt={app.title} loading="lazy" />
+          <ThumbImg src={app.thumbnail_url} alt={app.title} />
         ) : (
           <span className="gallery-card__thumb-placeholder">🕹️</span>
         )}

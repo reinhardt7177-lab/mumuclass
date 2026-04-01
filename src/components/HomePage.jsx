@@ -20,6 +20,27 @@ const EMPTY_FORM = {
 const toThumbUrl = (url) =>
   url ? `https://image.thum.io/get/width/640/${url}` : ''
 
+/* 10초 후 src를 세팅해서 스크린샷 서비스가 준비될 시간을 줌 */
+function ThumbImg({ src, alt, className }) {
+  const [ready, setReady] = useState(false)
+  const isThum = src?.includes('thum.io')
+
+  useEffect(() => {
+    if (!isThum) { setReady(true); return }
+    const t = setTimeout(() => setReady(true), 10000)
+    return () => clearTimeout(t)
+  }, [src, isThum])
+
+  if (!src) return null
+  if (!ready) return (
+    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'#111', gap:'0.4rem' }}>
+      <div style={{ width:20, height:20, border:'2px solid #444', borderTopColor:'#f39c12', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
+      <span style={{ fontSize:'0.65rem', color:'#555' }}>생성 중...</span>
+    </div>
+  )
+  return <img src={src} alt={alt} className={className} loading="lazy" />
+}
+
 /* ── 앱 업로드 모달 ── */
 function UploadModal({ user, onClose, onUploaded }) {
   const [form, setForm] = useState(EMPTY_FORM)
@@ -277,7 +298,7 @@ export default function HomePage() {
                   className="retro-card"
                 >
                   <div className="retro-card__img">
-                    <img src={app.screenshot_url} alt={app.title} loading="lazy" />
+                    <ThumbImg src={app.screenshot_url} alt={app.title} />
                   </div>
                   <div className="retro-card__name">{app.title}</div>
                 </Link>
