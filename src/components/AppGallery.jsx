@@ -38,9 +38,11 @@ const EMPTY_FORM = {
   title: '',
   description: '',
   url: '',
-  thumbnail_url: '',
   category: '기타',
 }
+
+const toThumbUrl = (url) =>
+  url ? `https://image.thum.io/get/width/640/crop/480/${encodeURIComponent(url)}` : ''
 
 /* ── 스피너 ── */
 function Spinner({ size = 24 }) {
@@ -218,11 +220,12 @@ function AddAppModal({ onClose, onAdded, user }) {
     setSubmitting(true)
     setMessage(null)
 
+    const appUrl = form.url.trim() || null
     const { error } = await supabase.from('gallery_apps').insert([{
       title: form.title.trim(),
       description: form.description.trim() || null,
-      url: form.url.trim() || null,
-      thumbnail_url: form.thumbnail_url.trim() || null,
+      url: appUrl,
+      thumbnail_url: appUrl ? toThumbUrl(appUrl) : null,
       category: form.category || '기타',
       creator_email: user?.email || '',
       creator_name:
@@ -298,20 +301,17 @@ function AddAppModal({ onClose, onAdded, user }) {
               onChange={handleChange}
               placeholder="https://..."
             />
-            <span className="gallery-form__hint">iframe으로 직접 실행됩니다</span>
-          </div>
-
-          <div className="gallery-form__group">
-            <label className="gallery-form__label">썸네일 이미지 URL</label>
-            <input
-              className="gallery-form__input"
-              type="url"
-              name="thumbnail_url"
-              value={form.thumbnail_url}
-              onChange={handleChange}
-              placeholder="https://... (스크린샷 이미지 주소)"
-            />
-            <span className="gallery-form__hint">카드에 표시될 미리보기 이미지</span>
+            <span className="gallery-form__hint">입력 시 첫 화면이 썸네일로 자동 설정됩니다</span>
+            {form.url && (
+              <div className="gallery-form__thumb-preview">
+                <img
+                  src={toThumbUrl(form.url)}
+                  alt="썸네일 미리보기"
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
+                <span>썸네일 자동 생성 중...</span>
+              </div>
+            )}
           </div>
 
           <div className="gallery-form__group">

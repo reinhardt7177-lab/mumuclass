@@ -12,10 +12,13 @@ const EMPTY_FORM = {
   title: '',
   one_line_desc: '',
   preview_url: '',
-  screenshot_url: '',
   category: '기타',
   creator_name: '',
 }
+
+/* URL → 자동 썸네일 */
+const toThumbUrl = (url) =>
+  url ? `https://image.thum.io/get/width/640/crop/480/${encodeURIComponent(url)}` : ''
 
 /* ── 앱 업로드 모달 ── */
 function UploadModal({ user, onClose, onUploaded }) {
@@ -41,11 +44,12 @@ function UploadModal({ user, onClose, onUploaded }) {
     setSubmitting(true)
     setMessage(null)
 
+    const url = form.preview_url.trim()
     const { error } = await supabase.from('apps').insert([{
       title: form.title.trim(),
       one_line_desc: form.description?.trim() || form.title.trim(),
-      preview_url: form.preview_url.trim(),
-      screenshot_url: form.screenshot_url.trim() || null,
+      preview_url: url,
+      screenshot_url: toThumbUrl(url),
       category: form.category,
       creator_name: form.creator_name.trim() ||
         user?.user_metadata?.display_name ||
@@ -120,7 +124,7 @@ function UploadModal({ user, onClose, onUploaded }) {
             />
           </div>
 
-          {/* 앱 URL */}
+          {/* 앱 URL + 자동 썸네일 미리보기 */}
           <div className="upload-field">
             <label className="upload-label">앱 실행 URL <span>*</span></label>
             <input
@@ -132,20 +136,17 @@ function UploadModal({ user, onClose, onUploaded }) {
               placeholder="https://... (클릭 시 실행될 주소)"
               required
             />
-            <span className="upload-hint">앱 상세 페이지에서 iframe으로 직접 실행됩니다</span>
-          </div>
-
-          {/* 썸네일 */}
-          <div className="upload-field">
-            <label className="upload-label">썸네일 이미지 URL</label>
-            <input
-              className="upload-input"
-              type="url"
-              name="screenshot_url"
-              value={form.screenshot_url}
-              onChange={handleChange}
-              placeholder="https://... (카드에 표시될 스크린샷)"
-            />
+            <span className="upload-hint">입력 시 첫 화면이 썸네일로 자동 설정됩니다</span>
+            {form.preview_url && (
+              <div className="upload-thumb-preview">
+                <img
+                  src={toThumbUrl(form.preview_url)}
+                  alt="썸네일 미리보기"
+                  onError={(e) => { e.target.style.display = 'none' }}
+                />
+                <span>썸네일 자동 생성 중...</span>
+              </div>
+            )}
           </div>
 
           {/* 카테고리 */}

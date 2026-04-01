@@ -1489,6 +1489,9 @@ img { max-width: 100%; }
 .upload-select { appearance: none; cursor: pointer; }
 .upload-select option { background: #1a1a2e; color: #e0daf0; }
 .upload-hint { display: block; font-size: 0.7rem; color: #666; margin-top: 0.3rem; }
+.upload-thumb-preview { margin-top: 0.6rem; position: relative; width: 100%; aspect-ratio: 4/3; background: #111; border: 1px solid #333; border-radius: 3px; overflow: hidden; }
+.upload-thumb-preview img { width: 100%; height: 100%; object-fit: cover; }
+.upload-thumb-preview span { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: #555; pointer-events: none; }
 .upload-submit { width: 100%; background: #f39c12; color: #1a1a1a; border: none; padding: 0.75rem; border-radius: 3px; font-weight: 900; font-size: 0.9rem; cursor: pointer; margin-top: 0.5rem; letter-spacing: 0.05em; box-shadow: 3px 3px 0 #c0392b; transition: transform 0.1s, box-shadow 0.1s; }
 .upload-submit:hover:not(:disabled) { transform: translate(-1px, -1px); box-shadow: 4px 4px 0 #c0392b; }
 .upload-submit:active:not(:disabled) { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #c0392b; }
