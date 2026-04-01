@@ -20,31 +20,11 @@ const EMPTY_FORM = {
 const toThumbUrl = (url) =>
   url ? `https://image.thum.io/get/width/640/${url}` : ''
 
-/* 10초 후 src를 세팅해서 스크린샷 서비스가 준비될 시간을 줌 */
-function ThumbImg({ src, alt, className }) {
-  const [ready, setReady] = useState(false)
-  const isThum = src?.includes('thum.io')
-
-  useEffect(() => {
-    if (!isThum) { setReady(true); return }
-    const t = setTimeout(() => setReady(true), 10000)
-    return () => clearTimeout(t)
-  }, [src, isThum])
-
-  if (!src) return null
-  if (!ready) return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'#111', gap:'0.4rem' }}>
-      <div style={{ width:20, height:20, border:'2px solid #444', borderTopColor:'#f39c12', borderRadius:'50%', animation:'spin 0.8s linear infinite' }} />
-      <span style={{ fontSize:'0.65rem', color:'#555' }}>생성 중...</span>
-    </div>
-  )
-  return <img src={src} alt={alt} className={className} loading="lazy" />
-}
-
 /* ── 앱 업로드 모달 ── */
 function UploadModal({ user, onClose, onUploaded }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
+  const [countdown, setCountdown] = useState(null) // null | number
   const [message, setMessage] = useState(null)
 
   const handleChange = (e) => {
@@ -66,11 +46,13 @@ function UploadModal({ user, onClose, onUploaded }) {
     setMessage(null)
 
     const url = form.preview_url.trim()
-    const { error } = await supabase.from('apps').insert([{
+
+    // 1) 먼저 screenshot_url 없이 저장
+    const { data: inserted, error } = await supabase.from('apps').insert([{
       title: form.title.trim(),
       one_line_desc: form.description?.trim() || form.title.trim(),
       preview_url: url,
-      screenshot_url: toThumbUrl(url),
+      screenshot_url: null,
       category: form.category,
       creator_name: form.creator_name.trim() ||
         user?.user_metadata?.display_name ||
@@ -79,19 +61,33 @@ function UploadModal({ user, onClose, onUploaded }) {
       code_access_level: '전체',
       ai_customizing_possible: false,
       rating: 0,
-    }])
-
-    setSubmitting(false)
+    }]).select('id').single()
 
     if (error) {
+      setSubmitting(false)
       setMessage({ type: 'error', text: `업로드 실패: ${error.message}` })
-    } else {
-      setMessage({ type: 'success', text: '앱이 업로드됐어요! 🎉' })
-      setTimeout(() => {
-        onUploaded()
-        onClose()
-      }, 1000)
+      return
     }
+
+    // 2) 20초 카운트다운 후 screenshot_url 업데이트
+    setSubmitting(false)
+    setMessage({ type: 'success', text: '앱 등록 완료! 썸네일 생성 중...' })
+    let remaining = 20
+    setCountdown(remaining)
+    const timer = setInterval(() => {
+      remaining -= 1
+      setCountdown(remaining)
+      if (remaining <= 0) {
+        clearInterval(timer)
+        supabase.from('apps')
+          .update({ screenshot_url: toThumbUrl(url) })
+          .eq('id', inserted.id)
+          .then(() => {
+            onUploaded()
+            onClose()
+          })
+      }
+    }, 1000)
   }
 
   // Esc 키로 닫기
@@ -201,9 +197,9 @@ function UploadModal({ user, onClose, onUploaded }) {
           <button
             type="submit"
             className="upload-submit"
-            disabled={submitting}
+            disabled={submitting || countdown !== null}
           >
-            {submitting ? '업로드 중...' : '🚀 앱 올리기'}
+            {submitting ? '업로드 중...' : countdown !== null ? `🖼️ 썸네일 생성 중... ${countdown}초` : '🚀 앱 올리기'}
           </button>
         </form>
       </div>
@@ -298,7 +294,7 @@ export default function HomePage() {
                   className="retro-card"
                 >
                   <div className="retro-card__img">
-                    <ThumbImg src={app.screenshot_url} alt={app.title} />
+                    <img src={app.screenshot_url} alt={app.title} loading="lazy" />
                   </div>
                   <div className="retro-card__name">{app.title}</div>
                 </Link>

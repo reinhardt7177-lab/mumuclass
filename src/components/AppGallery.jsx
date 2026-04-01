@@ -44,25 +44,6 @@ const EMPTY_FORM = {
 const toThumbUrl = (url) =>
   url ? `https://image.thum.io/get/width/640/${url}` : ''
 
-function ThumbImg({ src, alt }) {
-  const [ready, setReady] = useState(false)
-  const isThum = src?.includes('thum.io')
-
-  useEffect(() => {
-    if (!isThum) { setReady(true); return }
-    const t = setTimeout(() => setReady(true), 10000)
-    return () => clearTimeout(t)
-  }, [src, isThum])
-
-  if (!src) return null
-  if (!ready) return (
-    <div style={{ width:'100%', height:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'rgba(0,0,0,0.3)', gap:'0.4rem' }}>
-      <div className="gallery-spinner" style={{ width:20, height:20 }} />
-      <span style={{ fontSize:'0.65rem', color:'#4b4466' }}>생성 중...</span>
-    </div>
-  )
-  return <img src={src} alt={alt} loading="lazy" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-}
 
 /* ── 스피너 ── */
 function Spinner({ size = 24 }) {
@@ -80,7 +61,7 @@ function AppCard({ app, onClick }) {
     <div className="gallery-card" onClick={() => onClick(app)}>
       <div className="gallery-card__thumb">
         {app.thumbnail_url ? (
-          <ThumbImg src={app.thumbnail_url} alt={app.title} />
+          <img src={app.thumbnail_url} alt={app.title} loading="lazy" />
         ) : (
           <span className="gallery-card__thumb-placeholder">🕹️</span>
         )}
@@ -306,6 +287,7 @@ function EditAppModal({ app, onClose, onSaved }) {
 function AddAppModal({ onClose, onAdded, user }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
+  const [countdown, setCountdown] = useState(null)
   const [message, setMessage] = useState(null)
 
   const handleChange = (e) => {
@@ -323,30 +305,44 @@ function AddAppModal({ onClose, onAdded, user }) {
     setMessage(null)
 
     const appUrl = form.url.trim() || null
-    const { error } = await supabase.from('gallery_apps').insert([{
+    const { data: inserted, error } = await supabase.from('gallery_apps').insert([{
       title: form.title.trim(),
       description: form.description.trim() || null,
       url: appUrl,
-      thumbnail_url: appUrl ? toThumbUrl(appUrl) : null,
+      thumbnail_url: null,
       category: form.category || '기타',
       creator_email: user?.email || '',
       creator_name:
         user?.user_metadata?.display_name ||
         user?.email?.split('@')[0] ||
         '익명',
-    }])
+    }]).select('id').single()
 
     setSubmitting(false)
 
     if (error) {
       setMessage({ type: 'error', text: `등록 실패: ${error.message}` })
-    } else {
-      setMessage({ type: 'success', text: '앱이 갤러리에 추가됐어요! 🎉' })
-      setTimeout(() => {
-        onAdded()
-        onClose()
-      }, 1200)
+      return
     }
+
+    setMessage({ type: 'success', text: '등록 완료! 썸네일 생성 중...' })
+    let remaining = 20
+    setCountdown(remaining)
+    const timer = setInterval(() => {
+      remaining -= 1
+      setCountdown(remaining)
+      if (remaining <= 0) {
+        clearInterval(timer)
+        if (appUrl) {
+          supabase.from('gallery_apps')
+            .update({ thumbnail_url: toThumbUrl(appUrl) })
+            .eq('id', inserted.id)
+            .then(() => { onAdded(); onClose() })
+        } else {
+          onAdded(); onClose()
+        }
+      }
+    }, 1000)
   }
 
   // Esc 키로 닫기
@@ -433,9 +429,9 @@ function AddAppModal({ onClose, onAdded, user }) {
           <button
             type="submit"
             className="gallery-form__submit"
-            disabled={submitting}
+            disabled={submitting || countdown !== null}
           >
-            {submitting ? '추가 중...' : '🚀 갤러리에 추가하기'}
+            {submitting ? '추가 중...' : countdown !== null ? `🖼️ 썸네일 생성 중... ${countdown}초` : '🚀 갤러리에 추가하기'}
           </button>
         </form>
       </div>
