@@ -7,7 +7,6 @@ const links = [
   { path: '/ai-tech', label: 'AI 테크' },
   { path: '/community', label: '커뮤니티' },
   { path: '/shop', label: '교육상품' },
-  { path: '/gallery', label: '🕹️ 앱 갤러리' },
 ]
 
 export function Nav() {
