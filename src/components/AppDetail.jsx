@@ -5,6 +5,89 @@ import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 import DEMO_APPS from '../data/demoApps'
 
+const CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+
+/* ── 앱 수정 모달 ── */
+function EditModal({ app, onClose, onSaved }) {
+  const [form, setForm] = useState({
+    title: app.title || '',
+    one_line_desc: app.one_line_desc || '',
+    preview_url: app.preview_url || '',
+    category: app.category || '기타',
+    creator_name: app.creator_name || '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState(null)
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSave = async (e) => {
+    e.preventDefault()
+    if (!form.title.trim()) { setMessage({ type: 'error', text: '앱 이름을 입력해 주세요.' }); return }
+    setSaving(true)
+    const newUrl = form.preview_url.trim()
+    const { error } = await supabase.from('apps').update({
+      title: form.title.trim(),
+      one_line_desc: form.one_line_desc.trim(),
+      preview_url: newUrl,
+      screenshot_url: newUrl ? `https://image.thum.io/get/width/640/${newUrl}` : app.screenshot_url,
+      category: form.category,
+      creator_name: form.creator_name.trim(),
+    }).eq('id', app.id)
+    setSaving(false)
+    if (error) { setMessage({ type: 'error', text: `수정 실패: ${error.message}` }); return }
+    setMessage({ type: 'success', text: '수정됐어요! ✅' })
+    setTimeout(() => { onSaved(); onClose() }, 900)
+  }
+
+  return (
+    <div className="upload-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="upload-modal">
+        <button className="upload-modal__close" onClick={onClose}>✕</button>
+        <div className="upload-modal__header">
+          <span className="upload-modal__pixel" />
+          <h2 className="upload-modal__title">앱 수정</h2>
+        </div>
+        {message && <div className={`upload-alert upload-alert--${message.type}`}>{message.text}</div>}
+        <form onSubmit={handleSave}>
+          <div className="upload-field">
+            <label className="upload-label">앱 이름 <span>*</span></label>
+            <input className="upload-input" type="text" name="title" value={form.title} onChange={handleChange} required />
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">한 줄 설명</label>
+            <input className="upload-input" type="text" name="one_line_desc" value={form.one_line_desc} onChange={handleChange} placeholder="어떤 앱인지 간단히 설명해 주세요" />
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">앱 실행 URL</label>
+            <input className="upload-input" type="url" name="preview_url" value={form.preview_url} onChange={handleChange} placeholder="https://..." />
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">카테고리</label>
+            <select className="upload-select" name="category" value={form.category} onChange={handleChange}>
+              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">제작자 이름</label>
+            <input className="upload-input" type="text" name="creator_name" value={form.creator_name} onChange={handleChange} />
+          </div>
+          <button type="submit" className="upload-submit" disabled={saving}>{saving ? '저장 중...' : '✏️ 수정 저장'}</button>
+        </form>
+      </div>
+    </div>
+  )
+}
+
 function Stars({ rating, size = '0.85rem' }) {
   const r = Math.round(rating || 0)
   return (
@@ -24,6 +107,7 @@ export default function AppDetail() {
   const [app, setApp] = useState(null)
   const [loading, setLoading] = useState(true)
   const [iframeLoaded, setIframeLoaded] = useState(false)
+  const [showEdit, setShowEdit] = useState(false)
 
   // Review state
   const [reviews, setReviews] = useState([])
@@ -193,9 +277,14 @@ export default function AppDetail() {
                 </a>
               )}
               {!isDemo && user?.email === app.creator_email && (
-                <button onClick={handleDeleteApp} className="retro-detail__delete-btn">
-                  🗑️ 삭제
-                </button>
+                <>
+                  <button onClick={() => setShowEdit(true)} className="retro-detail__play-btn" style={{ background: '#2d3748', boxShadow: 'none' }}>
+                    ✏️ 수정
+                  </button>
+                  <button onClick={handleDeleteApp} className="retro-detail__delete-btn">
+                    🗑️ 삭제
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -316,6 +405,13 @@ export default function AppDetail() {
         )}
       </div>
       <Footer />
+      {showEdit && (
+        <EditModal
+          app={app}
+          onClose={() => setShowEdit(false)}
+          onSaved={fetchApp}
+        />
+      )}
     </>
   )
 }

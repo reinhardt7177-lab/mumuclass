@@ -42,7 +42,7 @@ const EMPTY_FORM = {
 }
 
 const toThumbUrl = (url) =>
-  url ? `https://image.thum.io/get/width/640/crop/480/${encodeURIComponent(url)}` : ''
+  url ? `https://image.thum.io/get/width/640/${url}` : ''
 
 /* ── 스피너 ── */
 function Spinner({ size = 24 }) {
@@ -87,7 +87,7 @@ function AppCard({ app, onClick }) {
 }
 
 /* ── 앱 상세 패널 ── */
-function AppDetailPanel({ app, onClose, onDelete, canDelete }) {
+function AppDetailPanel({ app, onClose, onDelete, canDelete, onEdit }) {
   const [iframeLoaded, setIframeLoaded] = useState(false)
   const [showIframe, setShowIframe] = useState(false)
 
@@ -145,12 +145,21 @@ function AppDetailPanel({ app, onClose, onDelete, canDelete }) {
                 </a>
               )}
               {canDelete && (
-                <button
-                  className="gallery-detail__delete-btn"
-                  onClick={() => onDelete(app.id)}
-                >
-                  🗑️ 삭제
-                </button>
+                <>
+                  <button
+                    className="gallery-detail__play-btn"
+                    onClick={onEdit}
+                    style={{ background: 'rgba(99,102,241,0.25)', boxShadow: 'none', border: '1px solid rgba(99,102,241,0.4)', color: '#a5b4fc' }}
+                  >
+                    ✏️ 수정
+                  </button>
+                  <button
+                    className="gallery-detail__delete-btn"
+                    onClick={() => onDelete(app.id)}
+                  >
+                    🗑️ 삭제
+                  </button>
+                </>
               )}
             </div>
           </div>
@@ -195,6 +204,79 @@ function AppDetailPanel({ app, onClose, onDelete, canDelete }) {
             </div>
           )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+/* ── 앱 수정 모달 ── */
+function EditAppModal({ app, onClose, onSaved }) {
+  const [form, setForm] = useState({
+    title: app.title || '',
+    description: app.description || '',
+    url: app.url || '',
+    category: app.category || '기타',
+  })
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState(null)
+
+  useEffect(() => {
+    const handler = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSave = async (e) => {
+    e.preventDefault()
+    if (!form.title.trim()) { setMessage({ type: 'error', text: '앱 이름을 입력해 주세요.' }); return }
+    setSaving(true)
+    const newUrl = form.url.trim() || null
+    const { error } = await supabase.from('gallery_apps').update({
+      title: form.title.trim(),
+      description: form.description.trim() || null,
+      url: newUrl,
+      thumbnail_url: newUrl ? toThumbUrl(newUrl) : app.thumbnail_url,
+      category: form.category,
+    }).eq('id', app.id)
+    setSaving(false)
+    if (error) { setMessage({ type: 'error', text: `수정 실패: ${error.message}` }); return }
+    setMessage({ type: 'success', text: '수정됐어요! ✅' })
+    setTimeout(() => { onSaved(); onClose() }, 900)
+  }
+
+  return (
+    <div className="gallery-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="gallery-modal">
+        <button className="gallery-modal__close" onClick={onClose}>✕</button>
+        <div className="gallery-modal__title">✏️ 앱 수정</div>
+        {message && <div className={`gallery-alert gallery-alert--${message.type}`}>{message.text}</div>}
+        <form onSubmit={handleSave}>
+          <div className="gallery-form__group">
+            <label className="gallery-form__label">앱 이름 <span>*</span></label>
+            <input className="gallery-form__input" type="text" name="title" value={form.title} onChange={handleChange} required />
+          </div>
+          <div className="gallery-form__group">
+            <label className="gallery-form__label">설명</label>
+            <textarea className="gallery-form__textarea" name="description" value={form.description} onChange={handleChange} />
+          </div>
+          <div className="gallery-form__group">
+            <label className="gallery-form__label">앱 URL</label>
+            <input className="gallery-form__input" type="url" name="url" value={form.url} onChange={handleChange} placeholder="https://..." />
+            <span className="gallery-form__hint">URL 변경 시 썸네일도 자동 갱신됩니다</span>
+          </div>
+          <div className="gallery-form__group">
+            <label className="gallery-form__label">카테고리</label>
+            <select className="gallery-form__select" name="category" value={form.category} onChange={handleChange}>
+              {CATEGORIES.filter((c) => c !== '전체').map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </div>
+          <button type="submit" className="gallery-form__submit" disabled={saving}>{saving ? '저장 중...' : '✏️ 수정 저장'}</button>
+        </form>
       </div>
     </div>
   )
@@ -350,6 +432,7 @@ export default function AppGallery() {
   const [search, setSearch] = useState('')
   const [selectedApp, setSelectedApp] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
+  const [editingApp, setEditingApp] = useState(null)
 
   const fetchApps = useCallback(async () => {
     setLoading(true)
@@ -477,6 +560,15 @@ export default function AppGallery() {
           onClose={() => setSelectedApp(null)}
           onDelete={handleDelete}
           canDelete={canDelete(selectedApp)}
+          onEdit={() => { setEditingApp(selectedApp); setSelectedApp(null) }}
+        />
+      )}
+
+      {editingApp && (
+        <EditAppModal
+          app={editingApp}
+          onClose={() => setEditingApp(null)}
+          onSaved={() => { fetchApps(); setEditingApp(null) }}
         />
       )}
 

@@ -18,7 +18,7 @@ const EMPTY_FORM = {
 
 /* URL → 자동 썸네일 */
 const toThumbUrl = (url) =>
-  url ? `https://image.thum.io/get/width/640/crop/480/${encodeURIComponent(url)}` : ''
+  url ? `https://image.thum.io/get/width/640/${url}` : ''
 
 /* ── 앱 업로드 모달 ── */
 function UploadModal({ user, onClose, onUploaded }) {
