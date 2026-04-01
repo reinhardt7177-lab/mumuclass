@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || ''
+
 const links = [
   { path: '/story', label: '회사소개' },
   { path: '/ai-tech', label: 'AI 테크' },
@@ -15,6 +17,7 @@ export function Nav() {
   const location = useLocation()
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
+  const isAdmin = user?.email === ADMIN_EMAIL
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40)
@@ -56,6 +59,13 @@ export function Nav() {
 
         {user ? (
           <div className="nav__user">
+            {isAdmin && (
+              <Link
+                to="/admin"
+                onClick={() => setMenuOpen(false)}
+                style={{ fontSize: '0.78rem', fontWeight: 700, color: '#f39c12', background: 'rgba(243,156,18,0.12)', padding: '3px 10px', borderRadius: 4, border: '1px solid rgba(243,156,18,0.3)', textDecoration: 'none' }}
+              >🛡️ 관리자</Link>
+            )}
             <div className="nav__user-avatar" style={{ background: '#555', color: '#fff' }}>
               {user.user_metadata?.display_name?.charAt(0) || user.email?.charAt(0)?.toUpperCase() || '?'}
             </div>
