@@ -13,6 +13,7 @@ import Login from './components/Login'
 import CompanyStory from './components/CompanyStory'
 import AITechBoard from './components/AITechBoard'
 import AppGallery from './components/AppGallery'
+import AdminPanel from './components/AdminPanel'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="/gallery" element={
             <ProtectedRoute><AppGallery /></ProtectedRoute>
           } />
+          <Route path="/admin" element={<AdminPanel />} />
         </Routes>
       </AuthProvider>
     </BrowserRouter>

@@ -1505,7 +1505,30 @@ img { max-width: 100%; }
 .retro-card__img { width: 100%; aspect-ratio: 4/3; background: #000; border: 1px solid #ddd; overflow: hidden; box-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
 .retro-card__img img { width: 100%; height: 100%; object-fit: cover; }
 .retro-card__name { font-size: 0.9rem; font-weight: 700; color: #222; text-align: left; line-height: 1.3; }
+/* 썸네일 없는 홈 카드 */
+.retro-card__img--no-thumb { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; background: #1a1a2e; border: 2px solid #555; }
+.retro-card__img-cat { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }
+.retro-card__img-title { font-size: 0.88rem; font-weight: 700; color: #e0daf0; text-align: center; padding: 0 0.5rem; line-height: 1.3; }
+.retro-card__img-rating { font-size: 0.72rem; color: #F39C12; font-weight: 700; }
 .retro-loading { text-align: center; padding: 4rem; color: #666; font-size: 1.2rem; }
+
+/* AppDetail 새 레이아웃 */
+.retro-detail__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding: 1.5rem 2rem; border-bottom: 1px solid #e5e7eb; flex-wrap: wrap; }
+.retro-detail__header-left { flex: 1; min-width: 0; }
+.retro-detail__stats { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; margin-top: 0.5rem; font-size: 0.85rem; }
+.retro-detail__stat { display: flex; align-items: center; gap: 0.3rem; }
+.retro-detail__stat--cat { background: var(--accent-bg); color: var(--accent); padding: 2px 10px; border-radius: 12px; font-weight: 700; font-size: 0.75rem; }
+.retro-detail__header-actions { display: flex; gap: 0.5rem; flex-shrink: 0; padding-top: 0.25rem; }
+.retro-detail__btn { padding: 0.45rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 700; cursor: pointer; border: none; }
+.retro-detail__btn--edit { background: #2d3748; color: #a0aec0; }
+.retro-detail__btn--edit:hover { background: #4a5568; color: #fff; }
+.retro-detail__btn--del { background: rgba(231,76,60,0.1); border: 1px solid rgba(231,76,60,0.3); color: #e74c3c; }
+.retro-detail__btn--del:hover { background: rgba(231,76,60,0.2); }
+/* iframe 바 */
+.retro-detail__iframe-bar { display: flex; align-items: center; justify-content: space-between; padding: 0.5rem 2rem; background: #1a1a1a; border-bottom: 1px solid #333; }
+.retro-detail__iframe-btn { background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.15); color: #ccc; padding: 0.3rem 0.8rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-decoration: none; transition: background 0.15s; }
+.retro-detail__iframe-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+.retro-detail__no-url { text-align: center; padding: 3rem; color: #888; font-size: 0.9rem; }
 
 /* ==========================================
    APP DETAIL STYLE

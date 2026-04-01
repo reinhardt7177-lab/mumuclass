@@ -1,3 +1,11 @@
+/**
+ * Supabase apps 테이블에 컬럼 추가 필요 (최초 1회):
+ * alter table public.apps add column if not exists view_count integer default 0;
+ * alter table public.apps add column if not exists approved  boolean default false;
+ *
+ * RLS 정책 (비로그인 업로드 허용):
+ * create policy "apps anon insert" on public.apps for insert with check (true);
+ */
 import { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
@@ -5,26 +13,19 @@ import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 import DEMO_APPS from '../data/demoApps'
 
-const TAGS = ['BEST 바이브앱', '추천앱', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+const TAGS = ['BEST 바이브앱', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 const UPLOAD_CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 
-const EMPTY_FORM = {
-  title: '',
-  one_line_desc: '',
-  preview_url: '',
-  category: '기타',
-  creator_name: '',
-}
+const EMPTY_FORM = { title: '', one_line_desc: '', preview_url: '', category: '기타', creator_name: '' }
 
-/* URL → 자동 썸네일 */
 const toThumbUrl = (url) =>
   url ? `https://image.thum.io/get/width/640/${url}` : ''
 
-/* ── 앱 업로드 모달 ── */
+/* ── 업로드 모달 ── */
 function UploadModal({ user, onClose, onUploaded }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
-  const [countdown, setCountdown] = useState(null) // null | number
+  const [countdown, setCountdown] = useState(null)
   const [message, setMessage] = useState(null)
 
   const handleChange = (e) => {
@@ -34,20 +35,12 @@ function UploadModal({ user, onClose, onUploaded }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.title.trim()) {
-      setMessage({ type: 'error', text: '앱 이름을 입력해 주세요.' })
-      return
-    }
-    if (!form.preview_url.trim()) {
-      setMessage({ type: 'error', text: '앱 실행 URL을 입력해 주세요.' })
-      return
-    }
+    if (!form.title.trim()) { setMessage({ type: 'error', text: '앱 이름을 입력해 주세요.' }); return }
+    if (!form.preview_url.trim()) { setMessage({ type: 'error', text: '앱 실행 URL을 입력해 주세요.' }); return }
     setSubmitting(true)
     setMessage(null)
 
     const url = form.preview_url.trim()
-
-    // 1) 먼저 screenshot_url 없이 저장
     const { data: inserted, error } = await supabase.from('apps').insert([{
       title: form.title.trim(),
       one_line_desc: form.description?.trim() || form.title.trim(),
@@ -61,17 +54,14 @@ function UploadModal({ user, onClose, onUploaded }) {
       code_access_level: '전체',
       ai_customizing_possible: false,
       rating: 0,
+      approved: false,
     }]).select('id').single()
 
-    if (error) {
-      setSubmitting(false)
-      setMessage({ type: 'error', text: `업로드 실패: ${error.message}` })
-      return
-    }
-
-    // 2) 20초 카운트다운 후 screenshot_url 업데이트
     setSubmitting(false)
-    setMessage({ type: 'success', text: '앱 등록 완료! 썸네일 생성 중...' })
+
+    if (error) { setMessage({ type: 'error', text: `업로드 실패: ${error.message}` }); return }
+
+    setMessage({ type: 'success', text: '신청 완료! 관리자 승인 후 게시됩니다. 썸네일 생성 중...' })
     let remaining = 20
     setCountdown(remaining)
     const timer = setInterval(() => {
@@ -79,18 +69,12 @@ function UploadModal({ user, onClose, onUploaded }) {
       setCountdown(remaining)
       if (remaining <= 0) {
         clearInterval(timer)
-        supabase.from('apps')
-          .update({ screenshot_url: toThumbUrl(url) })
-          .eq('id', inserted.id)
-          .then(() => {
-            onUploaded()
-            onClose()
-          })
+        supabase.from('apps').update({ screenshot_url: toThumbUrl(url) }).eq('id', inserted.id)
+          .then(() => { onUploaded(); onClose() })
       }
     }, 1000)
   }
 
-  // Esc 키로 닫기
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', handler)
@@ -100,110 +84,70 @@ function UploadModal({ user, onClose, onUploaded }) {
   return (
     <div className="upload-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose() }}>
       <div className="upload-modal">
-        <button className="upload-modal__close" onClick={onClose} title="닫기">✕</button>
-
+        <button className="upload-modal__close" onClick={onClose}>✕</button>
         <div className="upload-modal__header">
           <span className="upload-modal__pixel" />
           <h2 className="upload-modal__title">앱 업로드</h2>
         </div>
+        <p style={{ fontSize: '0.78rem', color: '#888', marginBottom: '1rem' }}>
+          누구나 신청 가능 · 관리자 승인 후 게시됩니다
+        </p>
 
-        {message && (
-          <div className={`upload-alert upload-alert--${message.type}`}>
-            {message.text}
-          </div>
-        )}
+        {message && <div className={`upload-alert upload-alert--${message.type}`}>{message.text}</div>}
 
         <form onSubmit={handleSubmit}>
-          {/* 앱 이름 */}
           <div className="upload-field">
             <label className="upload-label">앱 이름 <span>*</span></label>
-            <input
-              className="upload-input"
-              type="text"
-              name="title"
-              value={form.title}
-              onChange={handleChange}
-              placeholder="예: 출석체크 앱"
-              required
-            />
+            <input className="upload-input" type="text" name="title" value={form.title} onChange={handleChange} placeholder="예: 출석체크 앱" required />
           </div>
-
-          {/* 한 줄 설명 */}
           <div className="upload-field">
             <label className="upload-label">한 줄 설명</label>
-            <input
-              className="upload-input"
-              type="text"
-              name="description"
-              value={form.description}
-              onChange={handleChange}
-              placeholder="어떤 앱인지 간단히 설명해 주세요"
-            />
+            <input className="upload-input" type="text" name="description" value={form.description} onChange={handleChange} placeholder="어떤 앱인지 간단히 설명해 주세요" />
           </div>
-
-          {/* 앱 URL + 자동 썸네일 미리보기 */}
           <div className="upload-field">
             <label className="upload-label">앱 실행 URL <span>*</span></label>
-            <input
-              className="upload-input"
-              type="url"
-              name="preview_url"
-              value={form.preview_url}
-              onChange={handleChange}
-              placeholder="https://... (클릭 시 실행될 주소)"
-              required
-            />
+            <input className="upload-input" type="url" name="preview_url" value={form.preview_url} onChange={handleChange} placeholder="https://..." required />
             <span className="upload-hint">입력 시 첫 화면이 썸네일로 자동 설정됩니다</span>
             {form.preview_url && (
               <div className="upload-thumb-preview">
-                <img
-                  src={toThumbUrl(form.preview_url)}
-                  alt="썸네일 미리보기"
-                  onError={(e) => { e.target.style.display = 'none' }}
-                />
+                <img src={toThumbUrl(form.preview_url)} alt="미리보기" onError={(e) => { e.target.style.display = 'none' }} />
                 <span>썸네일 자동 생성 중...</span>
               </div>
             )}
           </div>
-
-          {/* 카테고리 */}
           <div className="upload-field">
             <label className="upload-label">카테고리 <span>*</span></label>
-            <select
-              className="upload-select"
-              name="category"
-              value={form.category}
-              onChange={handleChange}
-            >
-              {UPLOAD_CATEGORIES.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
+            <select className="upload-select" name="category" value={form.category} onChange={handleChange}>
+              {UPLOAD_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
-
-          {/* 제작자 이름 */}
           <div className="upload-field">
             <label className="upload-label">제작자 이름</label>
-            <input
-              className="upload-input"
-              type="text"
-              name="creator_name"
-              value={form.creator_name}
-              onChange={handleChange}
-              placeholder={user?.user_metadata?.display_name || user?.email?.split('@')[0] || '익명'}
-            />
+            <input className="upload-input" type="text" name="creator_name" value={form.creator_name} onChange={handleChange}
+              placeholder={user?.user_metadata?.display_name || user?.email?.split('@')[0] || '익명'} />
           </div>
-
-          <button
-            type="submit"
-            className="upload-submit"
-            disabled={submitting || countdown !== null}
-          >
+          <button type="submit" className="upload-submit" disabled={submitting || countdown !== null}>
             {submitting ? '업로드 중...' : countdown !== null ? `🖼️ 썸네일 생성 중... ${countdown}초` : '🚀 앱 올리기'}
           </button>
         </form>
       </div>
     </div>
+  )
+}
+
+/* ── 홈페이지 카드 (썸네일 없음) ── */
+function AppCard({ app }) {
+  const colors = { '학급관리': '#e17055', '수학': '#6c5ce7', '국어': '#00b894', '게임': '#e84393', '퍼즐': '#f39c12', '에듀테크': '#00cec9', '기타': '#636e72' }
+  const color = colors[app.category] || '#636e72'
+  return (
+    <Link to={`/apps/${app.id}`} className="retro-card">
+      <div className="retro-card__img retro-card__img--no-thumb" style={{ borderColor: color }}>
+        <span className="retro-card__img-cat" style={{ color }}>{app.category || '기타'}</span>
+        <span className="retro-card__img-title">{app.title}</span>
+        {app.rating > 0 && <span className="retro-card__img-rating">★ {(app.rating).toFixed(1)}</span>}
+      </div>
+      <div className="retro-card__name">{app.title}</div>
+    </Link>
   )
 }
 
@@ -214,13 +158,13 @@ export default function HomePage() {
   const [activeTag, setActiveTag] = useState('BEST 바이브앱')
   const [showUpload, setShowUpload] = useState(false)
   const { user } = useAuth()
-  const navigate = useNavigate()
 
   const fetchApps = useCallback(async () => {
     setLoading(true)
     const { data } = await supabase
       .from('apps')
       .select('*')
+      .eq('approved', true)
       .order('created_at', { ascending: false })
     const realApps = data || []
     setApps([...DEMO_APPS, ...realApps])
@@ -229,27 +173,20 @@ export default function HomePage() {
 
   useEffect(() => { fetchApps() }, [fetchApps])
 
-  const handleUploadClick = () => {
-    if (!user) { navigate('/login'); return }
-    setShowUpload(true)
-  }
-
   const displayApps = (() => {
-    let result = apps
     if (activeTag === 'BEST 바이브앱') {
-      result = [...result].sort((a, b) => (b.rating || 0) - (a.rating || 0)).slice(0, 13)
-    } else if (activeTag === '추천앱') {
-      result = [...result].sort((a, b) => (b.rating || 0) - (a.rating || 0))
-    } else {
-      result = result.filter((app) => app.category === activeTag)
+      return [...apps].sort((a, b) => {
+        const ratingDiff = (b.rating || 0) - (a.rating || 0)
+        if (ratingDiff !== 0) return ratingDiff
+        return (b.view_count || 0) - (a.view_count || 0)
+      })
     }
-    return result
+    return apps.filter((app) => app.category === activeTag)
   })()
 
   return (
     <>
       <div className="retro-page">
-        {/* 카테고리 탭바 + 업로드 버튼 */}
         <nav className="retro-nav">
           <div className="retro-nav__tabs">
             {TAGS.map((tag) => (
@@ -257,48 +194,22 @@ export default function HomePage() {
                 key={tag}
                 className={`retro-nav__item ${activeTag === tag ? 'retro-nav__item--active' : ''}`}
                 onClick={() => setActiveTag(tag)}
-              >
-                {tag}
-              </button>
+              >{tag}</button>
             ))}
           </div>
-
-          {/* 맨 오른쪽 업로드 버튼 */}
-          <button
-            className="retro-nav__upload"
-            onClick={handleUploadClick}
-            title={user ? '앱 업로드하기' : '로그인 후 업로드 가능'}
-          >
+          <button className="retro-nav__upload" onClick={() => setShowUpload(true)}>
             ＋ 앱 올리기
           </button>
         </nav>
 
-        {/* 앱 그리드 */}
         <div className="retro-content">
           {loading ? (
-            <div className="retro-loading">
-              <span>⏳</span>
-              <p>앱을 불러오는 중...</p>
-            </div>
+            <div className="retro-loading"><span>⏳</span><p>앱을 불러오는 중...</p></div>
           ) : displayApps.length === 0 ? (
-            <div className="retro-loading">
-              <span>📦</span>
-              <p>앱이 없습니다</p>
-            </div>
+            <div className="retro-loading"><span>📦</span><p>앱이 없습니다</p></div>
           ) : (
             <div className="retro-grid">
-              {displayApps.map((app) => (
-                <Link
-                  to={`/apps/${app.id}`}
-                  key={app.id}
-                  className="retro-card"
-                >
-                  <div className="retro-card__img">
-                    <img src={app.screenshot_url} alt={app.title} loading="lazy" />
-                  </div>
-                  <div className="retro-card__name">{app.title}</div>
-                </Link>
-              ))}
+              {displayApps.map((app) => <AppCard key={app.id} app={app} />)}
             </div>
           )}
         </div>
@@ -306,13 +217,8 @@ export default function HomePage() {
 
       <Footer />
 
-      {/* 업로드 모달 */}
       {showUpload && (
-        <UploadModal
-          user={user}
-          onClose={() => setShowUpload(false)}
-          onUploaded={fetchApps}
-        />
+        <UploadModal user={user} onClose={() => setShowUpload(false)} onUploaded={fetchApps} />
       )}
     </>
   )
