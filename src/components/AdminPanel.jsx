@@ -262,11 +262,33 @@ function CategoriesTab({ msg, setMsg }) {
 
   const fetchCategories = async () => {
     setLoading(true)
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('app_categories')
       .select('*')
       .order('sort_order', { ascending: true })
-    setCategories(data || [])
+
+    if (error) {
+      // 테이블이 없을 수 있음 - 기본 카테고리를 로컬로 표시
+      setCategories([])
+      setLoading(false)
+      return
+    }
+
+    // DB에 카테고리가 하나도 없으면 기본값 자동 삽입
+    if (!data || data.length === 0) {
+      const { data: inserted, error: seedErr } = await supabase
+        .from('app_categories')
+        .insert(DEFAULT_CATEGORIES)
+        .select()
+      if (!seedErr && inserted) {
+        setCategories(inserted)
+      } else {
+        // insert 실패 시 로컬 폴백
+        setCategories(DEFAULT_CATEGORIES)
+      }
+    } else {
+      setCategories(data)
+    }
     setLoading(false)
   }
 
