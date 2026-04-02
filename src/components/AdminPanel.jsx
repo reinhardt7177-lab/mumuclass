@@ -83,7 +83,7 @@ function PendingTab({ msg, setMsg }) {
 function ApprovedTab({ msg, setMsg }) {
   const [apps, setApps] = useState([])
   const [loading, setLoading] = useState(true)
-  const [editing, setEditing] = useState({}) // { [id]: { rating, view_count } }
+  const [editing, setEditing] = useState({})
 
   useEffect(() => { fetchApproved() }, [])
 
@@ -91,7 +91,6 @@ function ApprovedTab({ msg, setMsg }) {
     setLoading(true)
     const { data } = await supabase.from('apps').select('*').eq('approved', true).order('created_at', { ascending: false })
     setApps(data || [])
-    // editing 초기값 세팅
     const init = {}
     ;(data || []).forEach(a => { init[a.id] = { rating: a.rating ?? 0, view_count: a.view_count ?? 0 } })
     setEditing(init)
@@ -149,8 +148,6 @@ function ApprovedTab({ msg, setMsg }) {
               <img src={app.screenshot_url} alt={app.title}
                 style={{ width: 96, height: 72, objectFit: 'cover', borderRadius: 6, flexShrink: 0, border: '1px solid #eee' }} />
             )}
-
-            {/* 앱 정보 */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 3 }}>{app.title}</div>
               <div style={{ fontSize: '0.78rem', color: '#aaa', marginBottom: 8, display: 'flex', gap: '0.6rem', flexWrap: 'wrap' }}>
@@ -158,35 +155,22 @@ function ApprovedTab({ msg, setMsg }) {
                 <span>by {app.creator_name || '익명'}</span>
                 {app.preview_url && <a href={app.preview_url} target="_blank" rel="noopener noreferrer" style={{ color: '#6c5ce7' }}>↗ 확인</a>}
               </div>
-
-              {/* 별점 / 조회수 편집 */}
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 <div>
                   <label style={S.label}>⭐ 별점 (0–5)</label>
-                  <input
-                    style={S.input}
-                    type="number" min="0" max="5" step="0.1"
-                    value={vals.rating}
-                    onChange={(e) => handleFieldChange(app.id, 'rating', e.target.value)}
-                  />
+                  <input style={S.input} type="number" min="0" max="5" step="0.1" value={vals.rating}
+                    onChange={(e) => handleFieldChange(app.id, 'rating', e.target.value)} />
                 </div>
                 <div>
                   <label style={S.label}>👁️ 조회수</label>
-                  <input
-                    style={S.input}
-                    type="number" min="0" step="1"
-                    value={vals.view_count}
-                    onChange={(e) => handleFieldChange(app.id, 'view_count', e.target.value)}
-                  />
+                  <input style={S.input} type="number" min="0" step="1" value={vals.view_count}
+                    onChange={(e) => handleFieldChange(app.id, 'view_count', e.target.value)} />
                 </div>
                 <button onClick={() => handleSave(app)} style={S.btn('#6c5ce7', '#fff')}>💾 저장</button>
               </div>
             </div>
-
-            {/* 우측 버튼 */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
-              <button
-                onClick={() => handleToggleBest(app)}
+              <button onClick={() => handleToggleBest(app)}
                 style={S.btn(app.is_best ? '#f39c12' : 'rgba(243,156,18,0.1)', app.is_best ? '#fff' : '#f39c12', app.is_best ? 'none' : '1px solid rgba(243,156,18,0.4)')}
               >{app.is_best ? '★ BEST 해제' : '☆ BEST 등록'}</button>
               <button onClick={() => handleUnapprove(app.id)} style={S.btn('rgba(99,110,114,0.1)', '#636e72', '1px solid rgba(99,110,114,0.3)')}>⏸ 게시취소</button>
@@ -203,7 +187,7 @@ function ApprovedTab({ msg, setMsg }) {
 function ReviewsTab({ msg, setMsg }) {
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
-  const [appMap, setAppMap] = useState({}) // { app_id: title }
+  const [appMap, setAppMap] = useState({})
 
   useEffect(() => { fetchAll() }, [])
 
@@ -253,10 +237,142 @@ function ReviewsTab({ msg, setMsg }) {
   )
 }
 
+/* ── 카테고리 관리 탭 ── */
+function CategoriesTab({ msg, setMsg }) {
+  const [categories, setCategories] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [newId, setNewId] = useState('')
+  const [newLabel, setNewLabel] = useState('')
+  const [newEmoji, setNewEmoji] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => { fetchCategories() }, [])
+
+  const fetchCategories = async () => {
+    setLoading(true)
+    const { data } = await supabase
+      .from('app_categories')
+      .select('*')
+      .order('sort_order', { ascending: true })
+    setCategories(data || [])
+    setLoading(false)
+  }
+
+  const handleAdd = async () => {
+    if (!newId.trim() || !newLabel.trim()) {
+      setMsg({ type: 'error', text: 'ID와 이름을 모두 입력해주세요.' })
+      setTimeout(() => setMsg(null), 3000)
+      return
+    }
+    if (categories.find(c => c.id === newId.trim())) {
+      setMsg({ type: 'error', text: '이미 존재하는 카테고리 ID입니다.' })
+      setTimeout(() => setMsg(null), 3000)
+      return
+    }
+
+    setSaving(true)
+    const { error } = await supabase
+      .from('app_categories')
+      .insert({
+        id: newId.trim(),
+        label: newLabel.trim(),
+        emoji: newEmoji.trim() || '📁',
+        sort_order: categories.length,
+      })
+
+    if (error) {
+      setMsg({ type: 'error', text: '추가 실패: ' + error.message })
+    } else {
+      setMsg({ type: 'success', text: `"${newLabel.trim()}" 카테고리 추가 완료!` })
+      setNewId('')
+      setNewLabel('')
+      setNewEmoji('')
+      fetchCategories()
+    }
+    setSaving(false)
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  const handleDelete = async (catId, catLabel) => {
+    if (!confirm(`"${catLabel}" 카테고리를 삭제하시겠습니까?\n해당 카테고리의 앱은 삭제되지 않습니다.`)) return
+
+    const { error } = await supabase.from('app_categories').delete().eq('id', catId)
+    if (error) {
+      setMsg({ type: 'error', text: '삭제 실패: ' + error.message })
+    } else {
+      setCategories(prev => prev.filter(c => c.id !== catId))
+      setMsg({ type: 'success', text: `"${catLabel}" 카테고리 삭제 완료` })
+    }
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  if (loading) return <p style={{ color: '#888', padding: '2rem' }}>불러오는 중...</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* 추가 폼 */}
+      <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fafafa' }}>
+        <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem' }}>➕ 새 카테고리 추가</p>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <input
+            type="text"
+            placeholder="ID (영문, 예: science)"
+            value={newId}
+            onChange={e => setNewId(e.target.value)}
+            style={{ flex: 1, minWidth: 120, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }}
+          />
+          <input
+            type="text"
+            placeholder="이름 (예: 과학)"
+            value={newLabel}
+            onChange={e => setNewLabel(e.target.value)}
+            style={{ flex: 1, minWidth: 100, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }}
+          />
+          <input
+            type="text"
+            placeholder="이모지 (예: 🔬)"
+            value={newEmoji}
+            onChange={e => setNewEmoji(e.target.value)}
+            style={{ width: 70, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem', textAlign: 'center' }}
+          />
+          <button onClick={handleAdd} disabled={saving} style={S.btn('#00b894', '#fff')}>
+            {saving ? '추가 중...' : '✅ 추가'}
+          </button>
+        </div>
+      </div>
+
+      {/* 카테고리 목록 */}
+      <p style={{ fontSize: '0.85rem', color: '#888' }}>등록된 카테고리 {categories.length}개</p>
+      {categories.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '3rem', color: '#888', border: '1px dashed #ddd', borderRadius: 8 }}>
+          <p style={{ fontSize: '2rem' }}>🏷️</p>
+          <p>등록된 카테고리가 없습니다.</p>
+        </div>
+      ) : (
+        categories.map(cat => (
+          <div key={cat.id} style={{ ...S.card, alignItems: 'center' }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 3 }}>
+                <span style={{ fontSize: '1.1rem' }}>{cat.emoji || '📁'}</span>
+                {cat.label}
+              </div>
+              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                ID: <code style={{ background: 'rgba(108,92,231,0.08)', color: '#6c5ce7', padding: '1px 5px', borderRadius: 3, fontSize: '0.75rem' }}>{cat.id}</code>
+                {cat.created_at && ` · ${new Date(cat.created_at).toLocaleDateString('ko-KR')}`}
+              </div>
+            </div>
+            <button onClick={() => handleDelete(cat.id, cat.label)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️ 삭제</button>
+          </div>
+        ))
+      )}
+    </div>
+  )
+}
+
 /* ── 메인 ── */
 export default function AdminPanel() {
   const { user, loading: authLoading } = useAuth()
-  const [tab, setTab] = useState('pending') // 'pending' | 'approved' | 'reviews'
+  const [tab, setTab] = useState('pending')
   const [msg, setMsg] = useState(null)
 
   const isAdmin = user?.email === ADMIN_EMAIL
@@ -276,7 +392,7 @@ export default function AdminPanel() {
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem' }}>
-        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리']].map(([key, label]) => (
+        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리 관리']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: '0.88rem',
@@ -300,6 +416,7 @@ export default function AdminPanel() {
       {tab === 'pending' && <PendingTab msg={msg} setMsg={setMsg} />}
       {tab === 'approved' && <ApprovedTab msg={msg} setMsg={setMsg} />}
       {tab === 'reviews' && <ReviewsTab msg={msg} setMsg={setMsg} />}
+      {tab === 'categories' && <CategoriesTab msg={msg} setMsg={setMsg} />}
     </div>
   )
 }
