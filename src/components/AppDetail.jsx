@@ -3,7 +3,6 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
-import DEMO_APPS from '../data/demoApps'
 
 const CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
@@ -120,18 +119,11 @@ export default function AppDetail() {
   const [reviewComment, setReviewComment] = useState('')
   const [submitting, setSubmitting] = useState(false)
 
-  const isDemo = id?.startsWith('demo-')
   const isOwner = user && app && (user.email === app.creator_email || user.email === ADMIN_EMAIL)
 
   useEffect(() => {
-    if (isDemo) {
-      const demoApp = DEMO_APPS.find(a => a.id === id)
-      setApp(demoApp || null)
-      setLoading(false)
-    } else {
-      fetchApp()
-      fetchReviews()
-    }
+    fetchApp()
+    fetchReviews()
   }, [id])
 
   /* 전체화면 이벤트 감지 */
@@ -229,14 +221,12 @@ export default function AppDetail() {
                 <Stars rating={app.rating} /> <b>{(app.rating || 0).toFixed(1)}</b>
                 <span style={{ color: '#888', fontSize: '0.8rem' }}> ({reviews.length}개 리뷰)</span>
               </span>
-              {!isDemo && (
-                <span className="retro-detail__stat">👁️ <b>{(app.view_count || 0).toLocaleString()}</b> 조회</span>
-              )}
+              <span className="retro-detail__stat">👁️ <b>{(app.view_count || 0).toLocaleString()}</b> 조회</span>
               {app.category && <span className="retro-detail__stat retro-detail__stat--cat">{app.category}</span>}
               {app.creator_name && <span className="retro-detail__stat">by {app.creator_name}</span>}
             </div>
           </div>
-          {!isDemo && isOwner && (
+          {isOwner && (
             <div className="retro-detail__header-actions">
               <button onClick={() => setShowEdit(true)} className="retro-detail__btn retro-detail__btn--edit">✏️ 수정</button>
               <button onClick={handleDeleteApp} className="retro-detail__btn retro-detail__btn--del">🗑️ 삭제</button>
@@ -290,8 +280,7 @@ export default function AppDetail() {
         </div>
 
         {/* ── 리뷰 ── */}
-        {!isDemo && (
-          <div className="retro-detail__section">
+        <div className="retro-detail__section">
             <h2 className="retro-detail__section-title">
               ⭐ 리뷰 <span style={{ fontSize: '0.85rem', color: '#888' }}>({reviews.length})</span>
               {reviews.length > 0 && (
@@ -347,7 +336,6 @@ export default function AppDetail() {
               </div>
             )}
           </div>
-        )}
       </div>
 
       <Footer />

@@ -11,7 +11,6 @@ import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
-import DEMO_APPS from '../data/demoApps'
 
 const TAGS = ['BEST 바이브앱', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 const UPLOAD_CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
@@ -189,7 +188,7 @@ export default function HomePage() {
       .eq('approved', true)
       .order('created_at', { ascending: false })
     const realApps = data || []
-    setApps([...DEMO_APPS, ...realApps])
+    setApps(realApps)
     setLoading(false)
   }, [])
 
