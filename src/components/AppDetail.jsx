@@ -20,6 +20,28 @@ function Stars({ rating, size = '0.9rem' }) {
 }
 
 /* ── 앱 수정 모달 ── */
+/* ── 이미지 피커 (수정 모달용) ── */
+function ImgPicker({ label, currentUrl, file, preview, onChange, hint }) {
+  const displaySrc = preview || currentUrl
+  return (
+    <div className="upload-field">
+      <label className="upload-label">{label}</label>
+      {hint && <span className="upload-hint" style={{ display: 'block', marginBottom: '0.4rem' }}>{hint}</span>}
+      <label className="upload-img-picker" style={{ borderColor: displaySrc ? '#f39c12' : undefined }}>
+        {displaySrc ? (
+          <img src={displaySrc} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 3 }} />
+        ) : (
+          <div className="upload-img-picker__placeholder">
+            <span style={{ fontSize: '1.8rem' }}>🖼️</span>
+            <span style={{ fontSize: '0.72rem', color: '#666', marginTop: '0.3rem' }}>클릭해서 변경</span>
+          </div>
+        )}
+        <input type="file" accept="image/*" style={{ display: 'none' }} onChange={onChange} />
+      </label>
+    </div>
+  )
+}
+
 function EditModal({ app, onClose, onSaved }) {
   const [form, setForm] = useState({
     title: app.title || '',
@@ -30,6 +52,12 @@ function EditModal({ app, onClose, onSaved }) {
   })
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
+  const [mainImg, setMainImg] = useState(null)
+  const [mainPreview, setMainPreview] = useState(null)
+  const [sub1Img, setSub1Img] = useState(null)
+  const [sub1Preview, setSub1Preview] = useState(null)
+  const [sub2Img, setSub2Img] = useState(null)
+  const [sub2Preview, setSub2Preview] = useState(null)
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -42,23 +70,47 @@ function EditModal({ app, onClose, onSaved }) {
     setForm((prev) => ({ ...prev, [name]: value }))
   }
 
+  const handleImgChange = (setter, previewSetter) => (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    setter(file)
+    previewSetter(URL.createObjectURL(file))
+  }
+
+  const uploadImg = async (file, folder) => {
+    const ext = file.name.split('.').pop()
+    const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+    const { error } = await supabase.storage.from('app-images').upload(path, file, { upsert: true })
+    if (error) throw new Error(`이미지 업로드 실패: ${error.message}`)
+    return supabase.storage.from('app-images').getPublicUrl(path).data.publicUrl
+  }
+
   const handleSave = async (e) => {
     e.preventDefault()
     if (!form.title.trim()) { setMessage({ type: 'error', text: '앱 이름을 입력해 주세요.' }); return }
     setSaving(true)
-    const newUrl = form.preview_url.trim()
-    const { error } = await supabase.from('apps').update({
-      title: form.title.trim(),
-      one_line_desc: form.one_line_desc.trim(),
-      preview_url: newUrl,
-      screenshot_url: newUrl ? `https://image.thum.io/get/width/640/${newUrl}` : app.screenshot_url,
-      category: form.category,
-      creator_name: form.creator_name.trim(),
-    }).eq('id', app.id)
-    setSaving(false)
-    if (error) { setMessage({ type: 'error', text: `수정 실패: ${error.message}` }); return }
-    setMessage({ type: 'success', text: '수정됐어요! ✅' })
-    setTimeout(() => { onSaved(); onClose() }, 900)
+    setMessage({ type: 'success', text: '저장 중...' })
+
+    try {
+      const updates = {
+        title: form.title.trim(),
+        one_line_desc: form.one_line_desc.trim(),
+        preview_url: form.preview_url.trim(),
+        category: form.category,
+        creator_name: form.creator_name.trim(),
+      }
+      if (mainImg) updates.screenshot_url = await uploadImg(mainImg, 'main')
+      if (sub1Img) updates.sub_image_1 = await uploadImg(sub1Img, 'sub')
+      if (sub2Img) updates.sub_image_2 = await uploadImg(sub2Img, 'sub')
+
+      const { error } = await supabase.from('apps').update(updates).eq('id', app.id)
+      if (error) throw new Error(error.message)
+      setMessage({ type: 'success', text: '수정됐어요! ✅' })
+      setTimeout(() => { onSaved(); onClose() }, 900)
+    } catch (err) {
+      setMessage({ type: 'error', text: err.message })
+      setSaving(false)
+    }
   }
 
   return (
@@ -93,6 +145,34 @@ function EditModal({ app, onClose, onSaved }) {
             <label className="upload-label">제작자 이름</label>
             <input className="upload-input" type="text" name="creator_name" value={form.creator_name} onChange={handleChange} />
           </div>
+
+          {/* ── 썸네일 변경 ── */}
+          <div style={{ borderTop: '1px solid #333', paddingTop: '1rem', marginTop: '0.5rem' }}>
+            <div className="upload-label" style={{ marginBottom: '0.75rem' }}>📸 썸네일 변경 (선택)</div>
+            <ImgPicker
+              label="메인 썸네일"
+              currentUrl={app.screenshot_url}
+              preview={mainPreview}
+              hint="앱 목록에 표시되는 대표 이미지"
+              onChange={handleImgChange(setMainImg, setMainPreview)}
+            />
+            <div className="upload-label" style={{ marginBottom: '0.5rem', marginTop: '0.25rem' }}>서브 이미지</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+              <ImgPicker
+                label="서브 1"
+                currentUrl={app.sub_image_1}
+                preview={sub1Preview}
+                onChange={handleImgChange(setSub1Img, setSub1Preview)}
+              />
+              <ImgPicker
+                label="서브 2"
+                currentUrl={app.sub_image_2}
+                preview={sub2Preview}
+                onChange={handleImgChange(setSub2Img, setSub2Preview)}
+              />
+            </div>
+          </div>
+
           <button type="submit" className="upload-submit" disabled={saving}>{saving ? '저장 중...' : '✏️ 수정 저장'}</button>
         </form>
       </div>
