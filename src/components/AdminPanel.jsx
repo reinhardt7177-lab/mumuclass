@@ -3,7 +3,7 @@ import { Navigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || ''
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 /* ── 공통 스타일 ── */
 const S = {

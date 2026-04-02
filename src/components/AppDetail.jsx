@@ -6,7 +6,7 @@ import { Footer } from './Footer'
 import DEMO_APPS from '../data/demoApps'
 
 const CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || ''
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 /* ── 별점 ── */
 function Stars({ rating, size = '0.9rem' }) {

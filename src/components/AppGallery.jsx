@@ -32,7 +32,7 @@ import { useAuth } from '../contexts/AuthContext'
 import './AppGallery.css'
 
 const CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
-const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || ''
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 const EMPTY_FORM = {
   title: '',
