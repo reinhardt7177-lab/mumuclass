@@ -12,8 +12,7 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 
-const TAGS = ['BEST 바이브앱', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
-const UPLOAD_CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+const FALLBACK_TAGS = ['BEST 바이브앱', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 
 const EMPTY_FORM = { title: '', one_line_desc: '', preview_url: '', category: '기타', creator_name: '' }
 
@@ -158,7 +157,7 @@ function UploadModal({ user, onClose, onUploaded }) {
           <div className="upload-field">
             <label className="upload-label">카테고리 <span>*</span></label>
             <select className="upload-select" name="category" value={form.category} onChange={handleChange}>
-              {UPLOAD_CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {uploadCategories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="upload-field">
@@ -252,7 +251,25 @@ export default function HomePage() {
   const [loading, setLoading] = useState(true)
   const [activeTag, setActiveTag] = useState('BEST 바이브앱')
   const [showUpload, setShowUpload] = useState(false)
+  const [tags, setTags] = useState(FALLBACK_TAGS)
+  const [uploadCategories, setUploadCategories] = useState(FALLBACK_TAGS.filter(t => t !== 'BEST 바이브앱'))
   const { user } = useAuth()
+
+  // DB에서 카테고리 가져오기
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from('app_categories')
+        .select('*')
+        .order('sort_order', { ascending: true })
+      if (data && data.length > 0) {
+        const catLabels = data.map(c => c.label)
+        setTags(['BEST 바이브앱', ...catLabels])
+        setUploadCategories(catLabels)
+      }
+    }
+    fetchCategories()
+  }, [])
 
   const fetchApps = useCallback(async () => {
     setLoading(true)
@@ -286,7 +303,7 @@ export default function HomePage() {
       <div className="retro-page">
         <nav className="retro-nav">
           <div className="retro-nav__tabs">
-            {TAGS.map((tag) => (
+            {tags.map((tag) => (
               <button
                 key={tag}
                 className={`retro-nav__item ${activeTag === tag ? 'retro-nav__item--active' : ''}`}

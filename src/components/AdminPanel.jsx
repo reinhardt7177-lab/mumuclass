@@ -237,6 +237,17 @@ function ReviewsTab({ msg, setMsg }) {
   )
 }
 
+/* ── 기본 카테고리 (BEST 제외) ── */
+const DEFAULT_CATEGORIES = [
+  { id: '학급관리', label: '학급관리', emoji: '🏫', sort_order: 0 },
+  { id: '수학', label: '수학', emoji: '🔢', sort_order: 1 },
+  { id: '국어', label: '국어', emoji: '📖', sort_order: 2 },
+  { id: '게임', label: '게임', emoji: '🎮', sort_order: 3 },
+  { id: '퍼즐', label: '퍼즐', emoji: '🧩', sort_order: 4 },
+  { id: '에듀테크', label: '에듀테크', emoji: '💡', sort_order: 5 },
+  { id: '기타', label: '기타', emoji: '📁', sort_order: 6 },
+]
+
 /* ── 카테고리 관리 탭 ── */
 function CategoriesTab({ msg, setMsg }) {
   const [categories, setCategories] = useState([])
@@ -245,6 +256,7 @@ function CategoriesTab({ msg, setMsg }) {
   const [newLabel, setNewLabel] = useState('')
   const [newEmoji, setNewEmoji] = useState('')
   const [saving, setSaving] = useState(false)
+  const [seeding, setSeeding] = useState(false)
 
   useEffect(() => { fetchCategories() }, [])
 
@@ -256,6 +268,26 @@ function CategoriesTab({ msg, setMsg }) {
       .order('sort_order', { ascending: true })
     setCategories(data || [])
     setLoading(false)
+  }
+
+  const handleSeedDefaults = async () => {
+    if (!confirm('기본 카테고리 7개를 추가하시겠습니까?\n(이미 있는 ID는 건너뜁니다)')) return
+    setSeeding(true)
+    const existingIds = new Set(categories.map(c => c.id))
+    const toInsert = DEFAULT_CATEGORIES.filter(c => !existingIds.has(c.id))
+    if (toInsert.length === 0) {
+      setMsg({ type: 'success', text: '이미 모든 기본 카테고리가 등록되어 있습니다.' })
+    } else {
+      const { error } = await supabase.from('app_categories').insert(toInsert)
+      if (error) {
+        setMsg({ type: 'error', text: '추가 실패: ' + error.message })
+      } else {
+        setMsg({ type: 'success', text: `기본 카테고리 ${toInsert.length}개 추가 완료!` })
+        fetchCategories()
+      }
+    }
+    setSeeding(false)
+    setTimeout(() => setMsg(null), 3000)
   }
 
   const handleAdd = async () => {
@@ -310,6 +342,24 @@ function CategoriesTab({ msg, setMsg }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* 기본 카테고리 초기화 */}
+      {categories.length === 0 && (
+        <div style={{ border: '2px dashed #6c5ce7', borderRadius: 10, padding: '1.5rem', background: 'rgba(108,92,231,0.04)', textAlign: 'center' }}>
+          <p style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🏷️</p>
+          <p style={{ fontWeight: 700, marginBottom: '0.75rem' }}>카테고리가 없습니다</p>
+          <button onClick={handleSeedDefaults} disabled={seeding} style={S.btn('#6c5ce7', '#fff')}>
+            {seeding ? '추가 중...' : '📋 기본 카테고리 7개 한번에 추가'}
+          </button>
+        </div>
+      )}
+      {categories.length > 0 && categories.length < DEFAULT_CATEGORIES.length && (
+        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+          <button onClick={handleSeedDefaults} disabled={seeding} style={S.btn('rgba(108,92,231,0.1)', '#6c5ce7', '1px solid rgba(108,92,231,0.3)')}>
+            {seeding ? '추가 중...' : '📋 빠진 기본 카테고리 추가'}
+          </button>
+        </div>
+      )}
+
       {/* 추가 폼 */}
       <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fafafa' }}>
         <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem' }}>➕ 새 카테고리 추가</p>
