@@ -269,6 +269,23 @@ export default function AppDetail() {
           <div className="retro-detail__no-url">실행 URL이 등록되지 않은 앱입니다.</div>
         )}
 
+        {/* ── 서브 썸네일 ── */}
+        {(app.sub_image_1 || app.sub_image_2) && (
+          <div className="retro-detail__section">
+            <h2 className="retro-detail__section-title">🖼️ 스크린샷</h2>
+            <div style={{ display: 'grid', gridTemplateColumns: app.sub_image_1 && app.sub_image_2 ? '1fr 1fr' : '1fr', gap: '0.75rem' }}>
+              {app.sub_image_1 && (
+                <img src={app.sub_image_1} alt="스크린샷 1"
+                  style={{ width: '100%', borderRadius: 6, border: '1px solid #333', objectFit: 'cover', maxHeight: 280 }} />
+              )}
+              {app.sub_image_2 && (
+                <img src={app.sub_image_2} alt="스크린샷 2"
+                  style={{ width: '100%', borderRadius: 6, border: '1px solid #333', objectFit: 'cover', maxHeight: 280 }} />
+              )}
+            </div>
+          </div>
+        )}
+
         {/* ── 설명 ── */}
         <div className="retro-detail__section">
           <h2 className="retro-detail__section-title">📋 설명</h2>
