@@ -135,16 +135,38 @@ function UploadModal({ user, onClose, onUploaded }) {
   )
 }
 
-/* ── 홈페이지 카드 (썸네일 없음) ── */
+/* ── 홈페이지 카드 ── */
 function AppCard({ app }) {
   const colors = { '학급관리': '#e17055', '수학': '#6c5ce7', '국어': '#00b894', '게임': '#e84393', '퍼즐': '#f39c12', '에듀테크': '#00cec9', '기타': '#636e72' }
   const color = colors[app.category] || '#636e72'
   return (
     <Link to={`/apps/${app.id}`} className="retro-card">
-      <div className="retro-card__img retro-card__img--no-thumb" style={{ borderColor: color }}>
-        <span className="retro-card__img-cat" style={{ color }}>{app.category || '기타'}</span>
-        <span className="retro-card__img-title">{app.title}</span>
-        {app.rating > 0 && <span className="retro-card__img-rating">★ {(app.rating).toFixed(1)}</span>}
+      <div className="retro-card__img" style={{ borderColor: color, position: 'relative', overflow: 'hidden' }}>
+        {app.screenshot_url ? (
+          <>
+            <img
+              src={app.screenshot_url}
+              alt={app.title}
+              style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+              onError={(e) => { e.target.style.display = 'none'; e.target.nextSibling.style.display = 'flex' }}
+            />
+            <div style={{ display: 'none', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', position: 'absolute', inset: 0 }}>
+              <span className="retro-card__img-cat" style={{ color }}>{app.category || '기타'}</span>
+              <span className="retro-card__img-title">{app.title}</span>
+            </div>
+          </>
+        ) : (
+          <>
+            <span className="retro-card__img-cat" style={{ color }}>{app.category || '기타'}</span>
+            <span className="retro-card__img-title">{app.title}</span>
+          </>
+        )}
+        {app.rating > 0 && (
+          <span className="retro-card__img-rating" style={{ position: 'absolute', bottom: 6, right: 6, zIndex: 2 }}>★ {(app.rating).toFixed(1)}</span>
+        )}
+        {app.is_best && (
+          <span style={{ position: 'absolute', top: 6, left: 6, background: '#f39c12', color: '#000', fontSize: '0.65rem', fontWeight: 900, padding: '2px 6px', borderRadius: 3, zIndex: 2 }}>BEST</span>
+        )}
       </div>
       <div className="retro-card__name">{app.title}</div>
     </Link>
@@ -175,11 +197,13 @@ export default function HomePage() {
 
   const displayApps = (() => {
     if (activeTag === 'BEST 바이브앱') {
-      return [...apps].sort((a, b) => {
-        const ratingDiff = (b.rating || 0) - (a.rating || 0)
-        if (ratingDiff !== 0) return ratingDiff
-        return (b.view_count || 0) - (a.view_count || 0)
-      })
+      return [...apps]
+        .filter((a) => a.is_best)
+        .sort((a, b) => {
+          const ratingDiff = (b.rating || 0) - (a.rating || 0)
+          if (ratingDiff !== 0) return ratingDiff
+          return (b.view_count || 0) - (a.view_count || 0)
+        })
     }
     return apps.filter((app) => app.category === activeTag)
   })()

@@ -113,6 +113,15 @@ function ApprovedTab({ msg, setMsg }) {
     setTimeout(() => setMsg(null), 2000)
   }
 
+  const handleToggleBest = async (app) => {
+    const newVal = !app.is_best
+    const { error } = await supabase.from('apps').update({ is_best: newVal }).eq('id', app.id)
+    if (error) { setMsg({ type: 'error', text: `BEST 변경 실패: ${error.message}` }); return }
+    setApps(prev => prev.map(a => a.id === app.id ? { ...a, is_best: newVal } : a))
+    setMsg({ type: 'success', text: newVal ? `"${app.title}" BEST 등록!` : `"${app.title}" BEST 해제` })
+    setTimeout(() => setMsg(null), 2000)
+  }
+
   const handleDelete = async (id, title) => {
     if (!confirm(`"${title}"을(를) 삭제하시겠습니까?`)) return
     await supabase.from('apps').delete().eq('id', id)
@@ -176,7 +185,11 @@ function ApprovedTab({ msg, setMsg }) {
 
             {/* 우측 버튼 */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem', flexShrink: 0 }}>
-              <button onClick={() => handleUnapprove(app.id)} style={S.btn('#f39c12', '#fff')}>⏸ 게시취소</button>
+              <button
+                onClick={() => handleToggleBest(app)}
+                style={S.btn(app.is_best ? '#f39c12' : 'rgba(243,156,18,0.1)', app.is_best ? '#fff' : '#f39c12', app.is_best ? 'none' : '1px solid rgba(243,156,18,0.4)')}
+              >{app.is_best ? '★ BEST 해제' : '☆ BEST 등록'}</button>
+              <button onClick={() => handleUnapprove(app.id)} style={S.btn('rgba(99,110,114,0.1)', '#636e72', '1px solid rgba(99,110,114,0.3)')}>⏸ 게시취소</button>
               <button onClick={() => handleDelete(app.id, app.title)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️ 삭제</button>
             </div>
           </div>
@@ -186,10 +199,64 @@ function ApprovedTab({ msg, setMsg }) {
   )
 }
 
+/* ── 리뷰 관리 탭 ── */
+function ReviewsTab({ msg, setMsg }) {
+  const [reviews, setReviews] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [appMap, setAppMap] = useState({}) // { app_id: title }
+
+  useEffect(() => { fetchAll() }, [])
+
+  const fetchAll = async () => {
+    setLoading(true)
+    const [{ data: revData }, { data: appData }] = await Promise.all([
+      supabase.from('app_reviews').select('*').order('created_at', { ascending: false }),
+      supabase.from('apps').select('id, title').eq('approved', true),
+    ])
+    const map = {}
+    ;(appData || []).forEach(a => { map[a.id] = a.title })
+    setAppMap(map)
+    setReviews(revData || [])
+    setLoading(false)
+  }
+
+  const handleDelete = async (id) => {
+    if (!confirm('이 리뷰를 삭제하시겠습니까?')) return
+    const { error } = await supabase.from('app_reviews').delete().eq('id', id)
+    if (error) { setMsg({ type: 'error', text: `삭제 실패: ${error.message}` }); return }
+    setReviews(prev => prev.filter(r => r.id !== id))
+    setMsg({ type: 'success', text: '리뷰 삭제 완료' })
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  if (loading) return <p style={{ color: '#888', padding: '2rem' }}>불러오는 중...</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <p style={{ fontSize: '0.85rem', color: '#888' }}>전체 리뷰 {reviews.length}개</p>
+      {reviews.length === 0 && <p style={{ color: '#aaa', textAlign: 'center', padding: '2rem' }}>리뷰가 없습니다.</p>}
+      {reviews.map((rev) => (
+        <div key={rev.id} style={{ ...S.card, alignItems: 'center' }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: 4 }}>
+              <b style={{ color: '#6c5ce7' }}>{appMap[rev.app_id] || rev.app_id}</b>
+              {' · '}{rev.user_name || rev.user_email}
+              {' · '}{'★'.repeat(rev.rating)}{'☆'.repeat(5 - rev.rating)}
+              {' · '}{new Date(rev.created_at).toLocaleDateString('ko-KR')}
+            </div>
+            {rev.comment && <p style={{ fontSize: '0.88rem', margin: 0, color: '#374151' }}>{rev.comment}</p>}
+          </div>
+          <button onClick={() => handleDelete(rev.id)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️ 삭제</button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /* ── 메인 ── */
 export default function AdminPanel() {
   const { user, loading: authLoading } = useAuth()
-  const [tab, setTab] = useState('pending') // 'pending' | 'approved'
+  const [tab, setTab] = useState('pending') // 'pending' | 'approved' | 'reviews'
   const [msg, setMsg] = useState(null)
 
   const isAdmin = user?.email === ADMIN_EMAIL
@@ -209,7 +276,7 @@ export default function AdminPanel() {
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem' }}>
-        {[['pending', '⏳ 승인 대기'], ['approved', '📋 게시 중 앱 관리']].map(([key, label]) => (
+        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: '0.88rem',
@@ -232,6 +299,7 @@ export default function AdminPanel() {
 
       {tab === 'pending' && <PendingTab msg={msg} setMsg={setMsg} />}
       {tab === 'approved' && <ApprovedTab msg={msg} setMsg={setMsg} />}
+      {tab === 'reviews' && <ReviewsTab msg={msg} setMsg={setMsg} />}
     </div>
   )
 }
