@@ -48,7 +48,7 @@ function ImagePicker({ label, required, file, preview, onChange, hint }) {
 }
 
 /* ── 업로드 모달 ── */
-function UploadModal({ user, onClose, onUploaded }) {
+function UploadModal({ user, onClose, onUploaded, uploadCategories }) {
   const [form, setForm] = useState(EMPTY_FORM)
   const [submitting, setSubmitting] = useState(false)
   const [message, setMessage] = useState(null)
@@ -332,7 +332,7 @@ export default function HomePage() {
       <Footer />
 
       {showUpload && (
-        <UploadModal user={user} onClose={() => setShowUpload(false)} onUploaded={fetchApps} />
+        <UploadModal user={user} onClose={() => setShowUpload(false)} onUploaded={fetchApps} uploadCategories={uploadCategories} />
       )}
     </>
   )
