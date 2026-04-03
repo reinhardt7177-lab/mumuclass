@@ -4,18 +4,30 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 
-const CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '에듀테크', '기타']
+const FALLBACK_CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '에듀테크', '기타']
 
 export default function AppLabBoard() {
   const [posts, setPosts] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeCategory, setActiveCategory] = useState('전체')
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES)
   const { user } = useAuth()
   const navigate = useNavigate()
 
   useEffect(() => {
     fetchPosts()
+    fetchCategories()
   }, [])
+
+  const fetchCategories = async () => {
+    const { data } = await supabase
+      .from('app_categories')
+      .select('label')
+      .order('sort_order', { ascending: true })
+    if (data && data.length > 0) {
+      setCategories(['전체', ...data.map((c) => c.label)])
+    }
+  }
 
   const fetchPosts = async () => {
     setLoading(true)
@@ -68,7 +80,7 @@ export default function AppLabBoard() {
 
         {/* 카테고리 탭 */}
         <div className="community__tabs">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               className={`community__tab ${activeCategory === cat ? 'community__tab--active' : ''}`}

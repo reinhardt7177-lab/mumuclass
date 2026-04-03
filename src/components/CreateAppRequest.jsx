@@ -1,14 +1,28 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 
-const CATEGORIES = ['학급관리', '수학', '국어', '게임', '에듀테크', '기타']
+const FALLBACK_CATEGORIES = ['학급관리', '수학', '국어', '게임', '에듀테크', '기타']
 
 export default function CreateAppRequest() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES)
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const { data } = await supabase
+        .from('app_categories')
+        .select('label')
+        .order('sort_order', { ascending: true })
+      if (data && data.length > 0) {
+        setCategories(data.map((c) => c.label))
+      }
+    }
+    fetchCategories()
+  }, [])
   const [message, setMessage] = useState(null)
   const [form, setForm] = useState({
     title: '',
@@ -66,7 +80,7 @@ export default function CreateAppRequest() {
             <div className="form-group">
               <label>카테고리</label>
               <select name="category" value={form.category} onChange={handleChange}>
-                {CATEGORIES.map((c) => (
+                {categories.map((c) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
