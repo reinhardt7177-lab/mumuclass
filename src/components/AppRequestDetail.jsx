@@ -123,7 +123,7 @@ export default function AppRequestDetail() {
       .single()
     if (data) {
       setPost(data)
-      supabase.rpc('increment_request_views', { request_id: id })
+      supabase.from('app_requests').update({ views: (data.views || 0) + 1 }).eq('id', id)
     }
     setLoading(false)
   }

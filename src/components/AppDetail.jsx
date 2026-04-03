@@ -218,8 +218,7 @@ export default function AppDetail() {
     const { data } = await supabase.from('apps').select('*').eq('id', id).single()
     if (data) {
       setApp(data)
-      /* 조회수 증가 - RPC 함수(security definer)로 RLS 우회 */
-      supabase.rpc('increment_view_count', { app_id: id })
+      supabase.from('apps').update({ view_count: (data.view_count || 0) + 1 }).eq('id', id)
     }
     setLoading(false)
   }

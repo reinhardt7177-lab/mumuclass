@@ -20,7 +20,7 @@ export default function PostDetail() {
     if (data) {
       setPost(data)
       // 조회수 증가 — security definer RPC로 RLS 우회
-      supabase.rpc('increment_post_views', { post_id: id })
+      supabase.from('posts').update({ views: (data.views || 0) + 1 }).eq('id', id)
     }
     setLoading(false)
   }
