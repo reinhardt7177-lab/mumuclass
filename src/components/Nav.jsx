@@ -6,7 +6,7 @@ const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 const links = [
   { path: '/story', label: '회사소개' },
-  { path: '/ai-tech', label: 'AI 테크' },
+  { path: '/ai-tech', label: '앱제작연구소' },
   { path: '/community', label: '커뮤니티' },
   { path: '/shop', label: '교육상품' },
 ]

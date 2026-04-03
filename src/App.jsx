@@ -11,9 +11,11 @@ import CreatePost from './components/CreatePost'
 import PostDetail from './components/PostDetail'
 import Login from './components/Login'
 import CompanyStory from './components/CompanyStory'
-import AITechBoard from './components/AITechBoard'
 import AppGallery from './components/AppGallery'
 import AdminPanel from './components/AdminPanel'
+import AppLabBoard from './components/AppLabBoard'
+import CreateAppRequest from './components/CreateAppRequest'
+import AppRequestDetail from './components/AppRequestDetail'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -47,9 +49,15 @@ export default function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<Login />} />
           
-          {/* 회사 스토리 & AI 테크 (누구나 접근 가능) */}
+          {/* 회사 스토리 */}
           <Route path="/story" element={<CompanyStory />} />
-          <Route path="/ai-tech" element={<AITechBoard />} />
+
+          {/* 앱제작연구소 — 나만의앱 요청게시판 (읽기: 누구나 / 쓰기: 로그인 필요) */}
+          <Route path="/ai-tech" element={<AppLabBoard />} />
+          <Route path="/ai-tech/write" element={
+            <ProtectedRoute><CreateAppRequest /></ProtectedRoute>
+          } />
+          <Route path="/ai-tech/:id" element={<AppRequestDetail />} />
           
           {/* 앱 상세/등록은 로그인 필요 */}
           <Route path="/apps/create" element={
