@@ -169,6 +169,7 @@ export default function AppRequestDetail() {
 
   const handleLike = async () => {
     if (!post) return
+    if (!user) { navigate('/login'); return }
     const newLikes = (post.likes || 0) + 1
     await supabase.from('app_requests').update({ likes: newLikes }).eq('id', id)
     setPost({ ...post, likes: newLikes })
