@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 
 const FALLBACK_CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '에듀테크', '기타']
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 export default function AppLabBoard() {
   const [posts, setPosts] = useState([])
@@ -13,6 +14,7 @@ export default function AppLabBoard() {
   const [categories, setCategories] = useState(FALLBACK_CATEGORIES)
   const { user } = useAuth()
   const navigate = useNavigate()
+  const isAdmin = user?.email === ADMIN_EMAIL
 
   useEffect(() => {
     fetchPosts()
@@ -37,6 +39,14 @@ export default function AppLabBoard() {
       .order('created_at', { ascending: false })
     if (data) setPosts(data)
     setLoading(false)
+  }
+
+  const handleDelete = async (e, postId, title) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!confirm(`"${title}" 글을 삭제하시겠습니까?`)) return
+    await supabase.from('app_requests').delete().eq('id', postId)
+    setPosts((prev) => prev.filter((p) => p.id !== postId))
   }
 
   const filtered = activeCategory === '전체'
@@ -117,30 +127,44 @@ export default function AppLabBoard() {
         ) : (
           <div className="post-list">
             {filtered.map((post) => (
-              <Link to={`/ai-tech/${post.id}`} key={post.id} className="post-item">
-                <div className="post-item__left">
-                  <span className="post-item__category">{post.category || '기타'}</span>
-                  <h3 className="post-item__title">{post.title}</h3>
-                  <p className="post-item__preview">
-                    {post.content?.length > 80 ? post.content.slice(0, 80) + '...' : post.content}
-                  </p>
-                </div>
-                <div className="post-item__right">
-                  <div className="post-item__meta">
-                    <span className="post-item__author">
-                      <span className="post-item__avatar">
-                        {post.author_name?.charAt(0) || '?'}
+              <div key={post.id} style={{ position: 'relative' }}>
+                <Link to={`/ai-tech/${post.id}`} className="post-item">
+                  <div className="post-item__left">
+                    <span className="post-item__category">{post.category || '기타'}</span>
+                    <h3 className="post-item__title">{post.title}</h3>
+                    <p className="post-item__preview">
+                      {post.content?.length > 80 ? post.content.slice(0, 80) + '...' : post.content}
+                    </p>
+                  </div>
+                  <div className="post-item__right">
+                    <div className="post-item__meta">
+                      <span className="post-item__author">
+                        <span className="post-item__avatar">
+                          {post.author_name?.charAt(0) || '?'}
+                        </span>
+                        {post.author_name || '익명'}
                       </span>
-                      {post.author_name || '익명'}
-                    </span>
-                    <span className="post-item__time">{formatDate(post.created_at)}</span>
+                      <span className="post-item__time">{formatDate(post.created_at)}</span>
+                    </div>
+                    <div className="post-item__stats">
+                      <span>👁️ {post.views || 0}</span>
+                      <span>❤️ {post.likes || 0}</span>
+                    </div>
                   </div>
-                  <div className="post-item__stats">
-                    <span>👁️ {post.views || 0}</span>
-                    <span>❤️ {post.likes || 0}</span>
+                </Link>
+                {isAdmin && (
+                  <div style={{ position: 'absolute', top: 8, right: 8, display: 'flex', gap: '0.3rem', zIndex: 2 }}>
+                    <button
+                      onClick={(e) => { e.preventDefault(); navigate(`/ai-tech/${post.id}`) }}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 4, border: '1px solid rgba(108,92,231,0.3)', background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', fontWeight: 700, cursor: 'pointer' }}
+                    >✏️ 수정</button>
+                    <button
+                      onClick={(e) => handleDelete(e, post.id, post.title)}
+                      style={{ fontSize: '0.7rem', padding: '3px 8px', borderRadius: 4, border: '1px solid rgba(231,76,60,0.3)', background: 'rgba(231,76,60,0.1)', color: '#e74c3c', fontWeight: 700, cursor: 'pointer' }}
+                    >🗑️ 삭제</button>
                   </div>
-                </div>
-              </Link>
+                )}
+              </div>
             ))}
           </div>
         )}
