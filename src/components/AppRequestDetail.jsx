@@ -122,8 +122,9 @@ export default function AppRequestDetail() {
       .eq('id', id)
       .single()
     if (data) {
-      setPost(data)
-      supabase.from('app_requests').update({ views: (data.views || 0) + 1 }).eq('id', id)
+      const newViews = (data.views || 0) + 1
+      setPost({ ...data, views: newViews })
+      await supabase.from('app_requests').update({ views: newViews }).eq('id', id)
     }
     setLoading(false)
   }

@@ -217,8 +217,9 @@ export default function AppDetail() {
     setLoading(true)
     const { data } = await supabase.from('apps').select('*').eq('id', id).single()
     if (data) {
-      setApp(data)
-      supabase.from('apps').update({ view_count: (data.view_count || 0) + 1 }).eq('id', id)
+      const newCount = (data.view_count || 0) + 1
+      setApp({ ...data, view_count: newCount })
+      await supabase.from('apps').update({ view_count: newCount }).eq('id', id)
     }
     setLoading(false)
   }
