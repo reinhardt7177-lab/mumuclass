@@ -23,10 +23,8 @@ export default function AppRequestDetail() {
       .single()
     if (data) {
       setPost(data)
-      await supabase
-        .from('app_requests')
-        .update({ views: (data.views || 0) + 1 })
-        .eq('id', id)
+      // 조회수 증가 — security definer RPC로 RLS 우회
+      supabase.rpc('increment_request_views', { request_id: id })
     }
     setLoading(false)
   }

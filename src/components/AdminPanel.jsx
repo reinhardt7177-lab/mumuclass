@@ -257,6 +257,8 @@ function CategoriesTab({ msg, setMsg }) {
   const [newEmoji, setNewEmoji] = useState('')
   const [saving, setSaving] = useState(false)
   const [seeding, setSeeding] = useState(false)
+  const [orderChanged, setOrderChanged] = useState(false)
+  const [savingOrder, setSavingOrder] = useState(false)
 
   useEffect(() => { fetchCategories() }, [])
 
@@ -347,6 +349,27 @@ function CategoriesTab({ msg, setMsg }) {
     setTimeout(() => setMsg(null), 2000)
   }
 
+  const moveCategory = (index, direction) => {
+    const next = index + direction
+    if (next < 0 || next >= categories.length) return
+    const updated = [...categories]
+    ;[updated[index], updated[next]] = [updated[next], updated[index]]
+    setCategories(updated)
+    setOrderChanged(true)
+  }
+
+  const handleSaveOrder = async () => {
+    setSavingOrder(true)
+    const updates = categories.map((cat, i) =>
+      supabase.from('app_categories').update({ sort_order: i }).eq('id', cat.id)
+    )
+    await Promise.all(updates)
+    setSavingOrder(false)
+    setOrderChanged(false)
+    setMsg({ type: 'success', text: '카테고리 순서가 저장되었습니다!' })
+    setTimeout(() => setMsg(null), 2000)
+  }
+
   const handleDelete = async (catId, catLabel) => {
     if (!confirm(`"${catLabel}" 카테고리를 삭제하시겠습니까?\n해당 카테고리의 앱은 삭제되지 않습니다.`)) return
 
@@ -414,15 +437,35 @@ function CategoriesTab({ msg, setMsg }) {
       </div>
 
       {/* 카테고리 목록 */}
-      <p style={{ fontSize: '0.85rem', color: '#888' }}>등록된 카테고리 {categories.length}개</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <p style={{ fontSize: '0.85rem', color: '#888', margin: 0 }}>등록된 카테고리 {categories.length}개</p>
+        {orderChanged && (
+          <button onClick={handleSaveOrder} disabled={savingOrder} style={S.btn('#6c5ce7', '#fff')}>
+            {savingOrder ? '저장 중...' : '💾 순서 저장'}
+          </button>
+        )}
+      </div>
       {categories.length === 0 ? (
         <div style={{ textAlign: 'center', padding: '3rem', color: '#888', border: '1px dashed #ddd', borderRadius: 8 }}>
           <p style={{ fontSize: '2rem' }}>🏷️</p>
           <p>등록된 카테고리가 없습니다.</p>
         </div>
       ) : (
-        categories.map(cat => (
+        categories.map((cat, index) => (
           <div key={cat.id} style={{ ...S.card, alignItems: 'center' }}>
+            {/* 순서 버튼 */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
+              <button
+                onClick={() => moveCategory(index, -1)}
+                disabled={index === 0}
+                style={{ ...S.btn('rgba(108,92,231,0.08)', '#6c5ce7', '1px solid rgba(108,92,231,0.2)'), padding: '2px 7px', opacity: index === 0 ? 0.3 : 1 }}
+              >▲</button>
+              <button
+                onClick={() => moveCategory(index, 1)}
+                disabled={index === categories.length - 1}
+                style={{ ...S.btn('rgba(108,92,231,0.08)', '#6c5ce7', '1px solid rgba(108,92,231,0.2)'), padding: '2px 7px', opacity: index === categories.length - 1 ? 0.3 : 1 }}
+              >▼</button>
+            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 3 }}>
                 <span style={{ fontSize: '1.1rem' }}>{cat.emoji || '📁'}</span>
@@ -430,7 +473,7 @@ function CategoriesTab({ msg, setMsg }) {
               </div>
               <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
                 ID: <code style={{ background: 'rgba(108,92,231,0.08)', color: '#6c5ce7', padding: '1px 5px', borderRadius: 3, fontSize: '0.75rem' }}>{cat.id}</code>
-                {cat.created_at && ` · ${new Date(cat.created_at).toLocaleDateString('ko-KR')}`}
+                {` · 순서 ${index + 1}번`}
               </div>
             </div>
             <button onClick={() => handleDelete(cat.id, cat.label)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️ 삭제</button>

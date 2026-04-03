@@ -19,8 +19,8 @@ export default function PostDetail() {
     const { data } = await supabase.from('posts').select('*').eq('id', id).single()
     if (data) {
       setPost(data)
-      // 조회수 증가
-      await supabase.from('posts').update({ views: (data.views || 0) + 1 }).eq('id', id)
+      // 조회수 증가 — security definer RPC로 RLS 우회
+      supabase.rpc('increment_post_views', { post_id: id })
     }
     setLoading(false)
   }
