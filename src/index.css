@@ -1797,6 +1797,23 @@ img { max-width: 100%; }
   margin-bottom: 0.25rem;
 }
 
+/* Teacher count (왓퀴즈 스타일) */
+.story-stats__teacher-count {
+  text-align: center;
+  padding: 2.5rem 1rem;
+}
+.story-stats__count-num {
+  display: block;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 900;
+  color: #a29bfe;
+  margin-bottom: 0.5rem;
+}
+.story-stats__count-label {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .story-stat-card__label {
   font-size: 0.85rem;
   color: rgba(255, 255, 255, 0.6);

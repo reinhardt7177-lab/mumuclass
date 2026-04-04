@@ -20,16 +20,10 @@ function useCountUp(target, duration = 2000, start = false) {
   return count
 }
 
-/* ── 숫자 카운터 카드 ── */
-function StatCounter({ icon, target, label, suffix = '', visible }) {
-  const count = useCountUp(target, 1800, visible)
-  return (
-    <div className="story-stat-card">
-      <span className="story-stat-card__icon">{icon}</span>
-      <span className="story-stat-card__number">{count.toLocaleString()}{suffix}</span>
-      <span className="story-stat-card__label">{label}</span>
-    </div>
-  )
+/* ── 카운팅 텍스트 ── */
+function CountUpText({ target }) {
+  const count = useCountUp(target, 2000, true)
+  return <>{count.toLocaleString()}</>
 }
 
 /* ── 기능 탭 데이터 ── */
@@ -141,11 +135,12 @@ export default function CompanyStory() {
         {/* ===== Stats (Hero 바로 아래) ===== */}
         <section className="story-section story-stats" ref={(el) => { statsRef.current = el; addRef(el) }}>
           <div className="story-section__inner">
-            <div className="story-stats__grid">
-              <StatCounter icon="📱" target={stats.apps} label="등록된 교육 앱" suffix="+" visible={statsVisible} />
-              <StatCounter icon="👩‍🏫" target={stats.teachers} label="참여 교사" suffix="+" visible={statsVisible} />
-              <StatCounter icon="🧑‍🎓" target={stats.students} label="누적 방문자" suffix="+" visible={statsVisible} />
-            </div>
+            <p className="story-stats__teacher-count">
+              <span className="story-stats__count-num">
+                {statsVisible ? <CountUpText target={stats.teachers} /> : '0'}
+              </span>
+              <span className="story-stats__count-label">명의 선생님이 이미 사용 중이에요.</span>
+            </p>
           </div>
         </section>
 
