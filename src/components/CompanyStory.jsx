@@ -161,7 +161,7 @@ export default function CompanyStory() {
             <h2 className="story-section__title">왜 무궁무진클래스를 만들었을까요?</h2>
             <div className="story-brand__content">
               <p className="story-brand__text">
-                동료 선생님들과 <strong>'디스코(Di.S.Co)'</strong> 같은 에듀테크 프로젝트를 기획하고 실제 과학 행사나 교실에 적용해 보며 뼈저리게 느낀 점이 있습니다.
+                동료 선생님들과 다양한 바이브코딩앱을 기획하고 교실 수업에 적용해 보며 뼈저리게 느낀 점이 있습니다.
               </p>
               <blockquote className="story-brand__quote">
                 "우리 반 아이들에게 딱 맞는 도구는 없을까?"<br />
