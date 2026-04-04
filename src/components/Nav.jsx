@@ -6,10 +6,9 @@ import { supabase } from '../supabaseClient'
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 const links = [
-  { path: '/story', label: '회사소개' },
-  { path: '/ai-tech', label: '앱제작 의뢰소' },
+  { path: '/story', label: '우리의 이야기' },
+  { path: '/ai-tech', label: '바이브코딩 요청' },
   { path: '/community', label: '커뮤니티' },
-  { path: '/shop', label: '교육상품' },
 ]
 
 function useVisitorCount() {
