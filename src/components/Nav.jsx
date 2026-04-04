@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { supabase } from '../supabaseClient'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
@@ -11,6 +12,40 @@ const links = [
   { path: '/shop', label: '교육상품' },
 ]
 
+function useVisitorCount() {
+  const [todayCount, setTodayCount] = useState(null)
+  const [totalCount, setTotalCount] = useState(null)
+
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    const visited = sessionStorage.getItem('visited_date')
+
+    const track = async () => {
+      if (visited !== today) {
+        await supabase.rpc('increment_visit', { p_date: today })
+        sessionStorage.setItem('visited_date', today)
+      }
+
+      const { data } = await supabase
+        .from('site_visits')
+        .select('count')
+        .eq('visit_date', today)
+        .single()
+      setTodayCount(data?.count ?? 0)
+
+      const { data: totalData } = await supabase
+        .from('site_visits')
+        .select('count')
+      const sum = (totalData || []).reduce((acc, r) => acc + (r.count || 0), 0)
+      setTotalCount(sum)
+    }
+
+    track()
+  }, [])
+
+  return { todayCount, totalCount }
+}
+
 export function Nav() {
   const [scrolled, setScrolled] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
@@ -18,6 +53,7 @@ export function Nav() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const isAdmin = user?.email === ADMIN_EMAIL
+  const { todayCount, totalCount } = useVisitorCount()
 
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40)
@@ -40,7 +76,19 @@ export function Nav() {
               <img src="/favicon.svg" alt="Mumuclass Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
               <span className="retro-topbar__brand">무궁무진 클래스</span>
             </span>
-            <span className="retro-topbar__sub">BEST 바이브 코딩 앱</span>
+            {todayCount !== null && (
+              <span className="visitor-counter">
+                <span className="visitor-counter__item">
+                  <span className="visitor-counter__label">TODAY</span>
+                  <span className="visitor-counter__num">{todayCount.toLocaleString()}</span>
+                </span>
+                <span className="visitor-counter__divider">|</span>
+                <span className="visitor-counter__item">
+                  <span className="visitor-counter__label">TOTAL</span>
+                  <span className="visitor-counter__num">{(totalCount ?? 0).toLocaleString()}</span>
+                </span>
+              </span>
+            )}
           </div>
         </Link>
       </div>
