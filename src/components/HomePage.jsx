@@ -16,6 +16,44 @@ const FALLBACK_TAGS = ['BEST 바이브앱', '학급관리', '수학', '국어', 
 
 const EMPTY_FORM = { title: '', one_line_desc: '', preview_url: '', category: '기타', creator_name: '' }
 
+/* ── 오늘 방문자 수 기록 & 가져오기 ── */
+function useVisitorCount() {
+  const [todayCount, setTodayCount] = useState(null)
+  const [totalCount, setTotalCount] = useState(null)
+
+  useEffect(() => {
+    const today = new Date().toISOString().slice(0, 10)
+    const visited = sessionStorage.getItem('visited_date')
+
+    const track = async () => {
+      // 이 세션에서 아직 카운트하지 않았으면 +1
+      if (visited !== today) {
+        await supabase.rpc('increment_visit', { p_date: today })
+        sessionStorage.setItem('visited_date', today)
+      }
+
+      // 오늘 방문자 수
+      const { data } = await supabase
+        .from('site_visits')
+        .select('count')
+        .eq('visit_date', today)
+        .single()
+      setTodayCount(data?.count ?? 0)
+
+      // 총 방문자 수
+      const { data: totalData } = await supabase
+        .from('site_visits')
+        .select('count')
+      const sum = (totalData || []).reduce((acc, r) => acc + (r.count || 0), 0)
+      setTotalCount(sum)
+    }
+
+    track()
+  }, [])
+
+  return { todayCount, totalCount }
+}
+
 const toThumbUrl = (url) =>
   url ? `https://image.thum.io/get/width/640/${url}` : ''
 
@@ -254,6 +292,7 @@ export default function HomePage() {
   const [tags, setTags] = useState(FALLBACK_TAGS)
   const [uploadCategories, setUploadCategories] = useState(FALLBACK_TAGS.filter(t => t !== 'BEST 바이브앱'))
   const { user } = useAuth()
+  const { todayCount, totalCount } = useVisitorCount()
 
   // DB에서 카테고리 가져오기
   useEffect(() => {
@@ -301,6 +340,21 @@ export default function HomePage() {
   return (
     <>
       <div className="retro-page">
+        {/* 방문자 카운터 */}
+        {todayCount !== null && (
+          <div className="visitor-counter">
+            <span className="visitor-counter__item">
+              <span className="visitor-counter__label">TODAY</span>
+              <span className="visitor-counter__num">{todayCount.toLocaleString()}</span>
+            </span>
+            <span className="visitor-counter__divider">|</span>
+            <span className="visitor-counter__item">
+              <span className="visitor-counter__label">TOTAL</span>
+              <span className="visitor-counter__num">{(totalCount ?? 0).toLocaleString()}</span>
+            </span>
+          </div>
+        )}
+
         <nav className="retro-nav">
           <div className="retro-nav__tabs">
             {tags.map((tag) => (
