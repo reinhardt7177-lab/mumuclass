@@ -37,6 +37,7 @@ function PendingTab({ msg, setMsg }) {
 
   const handleDelete = async (id) => {
     if (!confirm('이 앱을 삭제하시겠습니까?')) return
+    if (!confirm('⚠️ 정말 삭제합니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?')) return
     await supabase.from('apps').delete().eq('id', id)
     setPending(prev => prev.filter(a => a.id !== id))
   }
@@ -123,6 +124,7 @@ function ApprovedTab({ msg, setMsg }) {
 
   const handleDelete = async (id, title) => {
     if (!confirm(`"${title}"을(를) 삭제하시겠습니까?`)) return
+    if (!confirm(`⚠️ 정말 삭제합니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?`)) return
     await supabase.from('apps').delete().eq('id', id)
     setApps(prev => prev.filter(a => a.id !== id))
   }
