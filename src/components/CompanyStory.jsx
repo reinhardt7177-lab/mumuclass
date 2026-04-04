@@ -243,7 +243,7 @@ export default function CompanyStory() {
             <p className="story-final-cta__count">
               <strong>{stats.teachers.toLocaleString()}명</strong> 선생님이 이미 함께하고 있어요.
             </p>
-            <Link to="/" className="story-final-cta__btn">
+            <Link to="/login" className="story-final-cta__btn">
               🚀 무궁무진클래스 시작하기
             </Link>
             <p className="story-final-cta__note">무료 가입 · 바로 사용 가능</p>
