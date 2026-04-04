@@ -63,18 +63,30 @@ export default function CompanyStory() {
 
   /* 통계 데이터 (DB에서 가져오기) */
   const [stats, setStats] = useState({ apps: 0, teachers: 0, students: 0 })
+  /* 탭별 실제 데이터 */
+  const [recentApps, setRecentApps] = useState([])
+  const [recentRequests, setRecentRequests] = useState([])
+  const [recentPosts, setRecentPosts] = useState([])
+
   useEffect(() => {
-    const fetchStats = async () => {
-      const { data: apps } = await supabase.from('apps').select('id', { count: 'exact', head: true }).eq('approved', true)
-      const { data: visits } = await supabase.from('site_visits').select('count')
+    const fetchAll = async () => {
+      const [{ data: apps }, { data: visits }, { data: requests }, { data: posts }] = await Promise.all([
+        supabase.from('apps').select('id, title, category, screenshot_url, rating, creator_name').eq('approved', true).order('created_at', { ascending: false }).limit(4),
+        supabase.from('site_visits').select('count'),
+        supabase.from('app_requests').select('id, title, status, created_at, author_name').order('created_at', { ascending: false }).limit(5),
+        supabase.from('community_posts').select('id, title, created_at, author_name').order('created_at', { ascending: false }).limit(5),
+      ])
       const totalVisits = (visits || []).reduce((sum, v) => sum + (v.count || 0), 0)
       setStats({
-        apps: apps?.length || 12,
+        apps: (apps || []).length || 12,
         teachers: Math.max(totalVisits, 50),
         students: Math.max(totalVisits * 5, 200),
       })
+      setRecentApps(apps || [])
+      setRecentRequests(requests || [])
+      setRecentPosts(posts || [])
     }
-    fetchStats()
+    fetchAll()
   }, [])
 
   useEffect(() => {
@@ -209,10 +221,66 @@ export default function CompanyStory() {
               ))}
             </div>
             <div className="story-features__panel">
-              <div className="story-features__emoji">{activeFeature.emoji}</div>
-              <h3 className="story-features__panel-title">{activeFeature.title}</h3>
-              <p className="story-features__panel-desc">{activeFeature.desc}</p>
-              <span className="story-features__highlight">💡 {activeFeature.highlight}</span>
+              {activeTab === 'store' && (
+                <>
+                  <h3 className="story-features__panel-title">📱 등록된 바이브앱</h3>
+                  {recentApps.length > 0 ? (
+                    <div className="story-preview__grid">
+                      {recentApps.map(app => (
+                        <Link to={`/apps/${app.id}`} key={app.id} className="story-preview__app">
+                          {app.screenshot_url && <img src={app.screenshot_url} alt={app.title} className="story-preview__thumb" />}
+                          <div className="story-preview__app-info">
+                            <span className="story-preview__app-title">{app.title}</span>
+                            <span className="story-preview__app-meta">{app.category} · {'★'.repeat(Math.round(app.rating || 0))}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="story-preview__empty">아직 등록된 앱이 없습니다. 첫 번째 앱을 올려보세요!</p>
+                  )}
+                  <Link to="/" className="story-preview__more">전체 앱 보러가기 →</Link>
+                </>
+              )}
+              {activeTab === 'request' && (
+                <>
+                  <h3 className="story-features__panel-title">🛠️ 최근 바이브코딩 요청</h3>
+                  {recentRequests.length > 0 ? (
+                    <div className="story-preview__list">
+                      {recentRequests.map(req => (
+                        <Link to={`/ai-tech/${req.id}`} key={req.id} className="story-preview__row">
+                          <span className={`story-preview__status story-preview__status--${req.status || 'pending'}`}>
+                            {req.status === 'completed' ? '완료' : req.status === 'in_progress' ? '진행중' : '대기'}
+                          </span>
+                          <span className="story-preview__row-title">{req.title}</span>
+                          <span className="story-preview__row-meta">{req.author_name || '익명'}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="story-preview__empty">아이디어만 남겨주세요! 바이브 코딩으로 만들어 드립니다.</p>
+                  )}
+                  <Link to="/ai-tech" className="story-preview__more">요청 게시판 가기 →</Link>
+                </>
+              )}
+              {activeTab === 'community' && (
+                <>
+                  <h3 className="story-features__panel-title">💬 최근 커뮤니티 글</h3>
+                  {recentPosts.length > 0 ? (
+                    <div className="story-preview__list">
+                      {recentPosts.map(post => (
+                        <Link to={`/community/${post.id}`} key={post.id} className="story-preview__row">
+                          <span className="story-preview__row-title">{post.title}</span>
+                          <span className="story-preview__row-meta">{post.author_name || '익명'} · {new Date(post.created_at).toLocaleDateString('ko-KR')}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="story-preview__empty">수업 노하우와 꿀팁을 나눠보세요!</p>
+                  )}
+                  <Link to="/community" className="story-preview__more">커뮤니티 가기 →</Link>
+                </>
+              )}
             </div>
           </div>
         </section>
