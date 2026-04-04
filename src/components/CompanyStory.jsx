@@ -36,35 +36,30 @@ function StatCounter({ icon, target, label, suffix = '', visible }) {
 const FEATURES = [
   {
     key: 'store',
-    tab: '맞춤 앱 스토어',
-    emoji: '🏪',
+    tab: '바이브앱 게시판',
+    emoji: '📱',
     title: '우리 반에 딱 맞는 앱을 찾아보세요',
     desc: '동료 선생님들이 직접 만들고 검증한 앱을 살펴보고, 우리 반에 딱 맞는 도구를 바로 적용하세요.',
     highlight: '실제 교실에서 검증된 앱만 모았습니다',
+    link: '/',
   },
   {
     key: 'request',
-    tab: '바이브코딩 교무실',
+    tab: '바이브코딩 요청',
     emoji: '🛠️',
     title: '아이디어만 남겨주세요',
     desc: '필요한 앱이 없나요? 아이디어만 남겨주세요. 바이브 코딩으로 선생님의 상상을 현실로 만들어 드립니다.',
     highlight: '코딩 지식 없이도 앱 제작 가능',
-  },
-  {
-    key: 'creator',
-    tab: '크리에이터 스튜디오',
-    emoji: '🎨',
-    title: '내가 만든 앱으로 수익을 창출하세요',
-    desc: '내가 만든 앱을 전국의 선생님들과 공유하세요. 창작의 가치가 합당한 보상과 수익으로 이어집니다.',
-    highlight: '앱 판매 수익 100% 크리에이터 귀속',
+    link: '/ai-tech',
   },
   {
     key: 'community',
-    tab: '수업 나눔 커뮤니티',
+    tab: '커뮤니티',
     emoji: '💬',
     title: '함께 나누며 성장합니다',
     desc: '도구를 활용한 생생한 수업 사례와 꿀팁을 나누며 함께 성장합니다.',
     highlight: '전국 선생님들의 수업 노하우 공유',
+    link: '/community',
   },
 ]
 
