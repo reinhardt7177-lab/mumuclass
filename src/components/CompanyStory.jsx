@@ -150,7 +150,6 @@ export default function CompanyStory() {
               <StatCounter icon="📱" target={stats.apps} label="등록된 교육 앱" suffix="+" visible={statsVisible} />
               <StatCounter icon="👩‍🏫" target={stats.teachers} label="참여 교사" suffix="+" visible={statsVisible} />
               <StatCounter icon="🧑‍🎓" target={stats.students} label="누적 방문자" suffix="+" visible={statsVisible} />
-              <StatCounter icon="🏛️" target={17} label="시·도 교육청 협력" suffix="개" visible={statsVisible} />
             </div>
           </div>
         </section>
