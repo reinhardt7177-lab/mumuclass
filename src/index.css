@@ -2615,3 +2615,35 @@ img { max-width: 100%; }
   }
 }
 
+/* ── 방문자 카운터 ── */
+.visitor-counter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding: 0.4rem 1.2rem;
+  background: #3e3e3e;
+  border-bottom: 1px solid #222;
+  font-family: 'Courier New', monospace;
+}
+.visitor-counter__item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.visitor-counter__label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #aaa;
+  letter-spacing: 0.5px;
+}
+.visitor-counter__num {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: #f39c12;
+}
+.visitor-counter__divider {
+  color: #555;
+  font-size: 0.75rem;
+}
+

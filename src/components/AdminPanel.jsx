@@ -484,6 +484,99 @@ function CategoriesTab({ msg, setMsg }) {
   )
 }
 
+/* ── 방문자 관리 탭 ── */
+function VisitorsTab({ msg, setMsg }) {
+  const [visits, setVisits] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [editing, setEditing] = useState({})
+
+  useEffect(() => { fetchVisits() }, [])
+
+  const fetchVisits = async () => {
+    setLoading(true)
+    const { data } = await supabase
+      .from('site_visits')
+      .select('*')
+      .order('visit_date', { ascending: false })
+      .limit(30)
+    setVisits(data || [])
+    const init = {}
+    ;(data || []).forEach(v => { init[v.visit_date] = v.count })
+    setEditing(init)
+    setLoading(false)
+  }
+
+  const totalCount = visits.reduce((sum, v) => sum + (v.count || 0), 0)
+
+  const handleSave = async (visitDate) => {
+    const newCount = Math.max(0, parseInt(editing[visitDate]) || 0)
+    const { error } = await supabase
+      .from('site_visits')
+      .update({ count: newCount })
+      .eq('visit_date', visitDate)
+    if (error) { setMsg({ type: 'error', text: `저장 실패: ${error.message}` }); return }
+    setMsg({ type: 'success', text: `${visitDate} 방문자 수 저장 완료` })
+    setVisits(prev => prev.map(v => v.visit_date === visitDate ? { ...v, count: newCount } : v))
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  const handleDelete = async (visitDate) => {
+    if (!confirm(`${visitDate} 기록을 삭제하시겠습니까?`)) return
+    const { error } = await supabase.from('site_visits').delete().eq('visit_date', visitDate)
+    if (error) { setMsg({ type: 'error', text: `삭제 실패: ${error.message}` }); return }
+    setVisits(prev => prev.filter(v => v.visit_date !== visitDate))
+    setMsg({ type: 'success', text: `${visitDate} 기록 삭제 완료` })
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  if (loading) return <p style={{ color: '#888', padding: '2rem' }}>불러오는 중...</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* 요약 */}
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 140, border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fff', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: 4 }}>오늘 방문자</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#6c5ce7' }}>
+            {(visits[0]?.visit_date === new Date().toISOString().slice(0, 10) ? visits[0]?.count : 0).toLocaleString()}
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: 140, border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fff', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: 4 }}>총 방문자 (최근 30일)</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#f39c12' }}>{totalCount.toLocaleString()}</div>
+        </div>
+      </div>
+
+      <p style={{ fontSize: '0.85rem', color: '#888' }}>최근 30일 기록</p>
+      {visits.length === 0 && <p style={{ color: '#aaa', textAlign: 'center', padding: '2rem' }}>방문 기록이 없습니다.</p>}
+      {visits.map((v) => (
+        <div key={v.visit_date} style={{ ...S.card, alignItems: 'center' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{v.visit_date}</div>
+              <div style={{ fontSize: '0.72rem', color: '#aaa' }}>
+                {new Date(v.visit_date + 'T00:00:00').toLocaleDateString('ko-KR', { weekday: 'long' })}
+              </div>
+            </div>
+            <div>
+              <label style={S.label}>방문자 수</label>
+              <input
+                style={{ ...S.input, width: 100 }}
+                type="number"
+                min="0"
+                value={editing[v.visit_date] ?? v.count}
+                onChange={(e) => setEditing(prev => ({ ...prev, [v.visit_date]: e.target.value }))}
+              />
+            </div>
+            <button onClick={() => handleSave(v.visit_date)} style={S.btn('#6c5ce7', '#fff')}>💾 저장</button>
+          </div>
+          <button onClick={() => handleDelete(v.visit_date)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️</button>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /* ── 메인 ── */
 export default function AdminPanel() {
   const { user, loading: authLoading } = useAuth()
@@ -507,7 +600,7 @@ export default function AdminPanel() {
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem' }}>
-        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리 관리']].map(([key, label]) => (
+        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리'], ['visitors', '👥 방문자']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: '0.88rem',
@@ -532,6 +625,7 @@ export default function AdminPanel() {
       {tab === 'approved' && <ApprovedTab msg={msg} setMsg={setMsg} />}
       {tab === 'reviews' && <ReviewsTab msg={msg} setMsg={setMsg} />}
       {tab === 'categories' && <CategoriesTab msg={msg} setMsg={setMsg} />}
+      {tab === 'visitors' && <VisitorsTab msg={msg} setMsg={setMsg} />}
     </div>
   )
 }
