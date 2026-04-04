@@ -4,7 +4,7 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 
-const CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+const FALLBACK_CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 /* ── 별점 ── */
@@ -58,6 +58,15 @@ function EditModal({ app, onClose, onSaved }) {
   const [sub1Preview, setSub1Preview] = useState(null)
   const [sub2Img, setSub2Img] = useState(null)
   const [sub2Preview, setSub2Preview] = useState(null)
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES)
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      const { data } = await supabase.from('app_categories').select('label').order('sort_order', { ascending: true })
+      if (data && data.length > 0) setCategories(data.map(c => c.label))
+    }
+    fetchCats()
+  }, [])
 
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') onClose() }
@@ -138,7 +147,7 @@ function EditModal({ app, onClose, onSaved }) {
           <div className="upload-field">
             <label className="upload-label">카테고리</label>
             <select className="upload-select" name="category" value={form.category} onChange={handleChange}>
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <div className="upload-field">

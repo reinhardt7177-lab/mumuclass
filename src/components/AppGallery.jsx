@@ -31,7 +31,7 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import './AppGallery.css'
 
-const CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+const FALLBACK_CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 const EMPTY_FORM = {
@@ -273,7 +273,7 @@ function EditAppModal({ app, onClose, onSaved }) {
           <div className="gallery-form__group">
             <label className="gallery-form__label">카테고리</label>
             <select className="gallery-form__select" name="category" value={form.category} onChange={handleChange}>
-              {CATEGORIES.filter((c) => c !== '전체').map((c) => <option key={c} value={c}>{c}</option>)}
+              {categories.filter((c) => c !== '전체').map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
           </div>
           <button type="submit" className="gallery-form__submit" disabled={saving}>{saving ? '저장 중...' : '✏️ 수정 저장'}</button>
@@ -420,7 +420,7 @@ function AddAppModal({ onClose, onAdded, user }) {
               value={form.category}
               onChange={handleChange}
             >
-              {CATEGORIES.filter((c) => c !== '전체').map((c) => (
+              {categories.filter((c) => c !== '전체').map((c) => (
                 <option key={c} value={c}>{c}</option>
               ))}
             </select>
@@ -449,6 +449,15 @@ export default function AppGallery() {
   const [selectedApp, setSelectedApp] = useState(null)
   const [showAddModal, setShowAddModal] = useState(false)
   const [editingApp, setEditingApp] = useState(null)
+  const [categories, setCategories] = useState(FALLBACK_CATEGORIES)
+
+  useEffect(() => {
+    const fetchCats = async () => {
+      const { data } = await supabase.from('app_categories').select('label').order('sort_order', { ascending: true })
+      if (data && data.length > 0) setCategories(['전체', ...data.map(c => c.label)])
+    }
+    fetchCats()
+  }, [])
 
   const fetchApps = useCallback(async () => {
     setLoading(true)
@@ -532,7 +541,7 @@ export default function AppGallery() {
           />
         </div>
         <div className="gallery-cats">
-          {CATEGORIES.map((cat) => (
+          {categories.map((cat) => (
             <button
               key={cat}
               className={`gallery-cat ${activeCategory === cat ? 'gallery-cat--active' : ''}`}
