@@ -59,9 +59,7 @@ const FEATURES = [
 
 export default function CompanyStory() {
   const sectionsRef = useRef([])
-  const [statsVisible, setStatsVisible] = useState(false)
   const [activeTab, setActiveTab] = useState('store')
-  const statsRef = useRef(null)
 
   /* 통계 데이터 (DB에서 가져오기) */
   const [stats, setStats] = useState({ apps: 0, teachers: 0, students: 0 })
@@ -85,7 +83,6 @@ export default function CompanyStory() {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             entry.target.classList.add('story-visible')
-            if (entry.target === statsRef.current) setStatsVisible(true)
           }
         })
       },
@@ -93,7 +90,6 @@ export default function CompanyStory() {
     )
 
     sectionsRef.current.forEach((el) => { if (el) observer.observe(el) })
-    if (statsRef.current) observer.observe(statsRef.current)
 
     return () => observer.disconnect()
   }, [])
@@ -129,17 +125,11 @@ export default function CompanyStory() {
               <span>✔️ 교사 주도 앱 생태계</span>
               <span>✔️ 바로 사용 가능한 맞춤 기능</span>
             </div>
-          </div>
-        </section>
-
-        {/* ===== Stats (Hero 바로 아래) ===== */}
-        <section className="story-section story-stats" ref={(el) => { statsRef.current = el; addRef(el) }}>
-          <div className="story-section__inner">
-            <p className="story-stats__teacher-count">
-              <span className="story-stats__count-num">
-                {statsVisible ? <CountUpText target={stats.teachers} /> : '0'}
+            <p className="story-hero__user-count">
+              <span className="story-hero__user-num">
+                <CountUpText target={stats.teachers} />
               </span>
-              <span className="story-stats__count-label">명의 선생님이 이미 사용 중이에요.</span>
+              명의 선생님이 이미 사용 중이에요.
             </p>
           </div>
         </section>

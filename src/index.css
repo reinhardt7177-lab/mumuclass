@@ -1708,6 +1708,18 @@ img { max-width: 100%; }
   font-size: 1.5rem;
 }
 
+/* Hero 내 사용자 카운트 */
+.story-hero__user-count {
+  margin-top: 1.5rem;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+.story-hero__user-num {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #a29bfe;
+}
+
 @keyframes floatDown {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(8px); }
