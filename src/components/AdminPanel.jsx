@@ -250,17 +250,16 @@ const DEFAULT_CATEGORIES = [
   { id: '기타', label: '기타', emoji: '📁', sort_order: 6 },
 ]
 
-/* ── 카테고리 관리 탭 ── */
+/* ── 카테고리 관리 탭 (계층 지원) ── */
 function CategoriesTab({ msg, setMsg }) {
-  const [categories, setCategories] = useState([])
+  const [allCats, setAllCats] = useState([])
   const [loading, setLoading] = useState(true)
   const [newId, setNewId] = useState('')
   const [newLabel, setNewLabel] = useState('')
   const [newEmoji, setNewEmoji] = useState('')
+  const [newParent, setNewParent] = useState('')
   const [saving, setSaving] = useState(false)
-  const [seeding, setSeeding] = useState(false)
-  const [orderChanged, setOrderChanged] = useState(false)
-  const [savingOrder, setSavingOrder] = useState(false)
+  const [expandedParent, setExpandedParent] = useState(null)
 
   useEffect(() => { fetchCategories() }, [])
 
@@ -271,50 +270,19 @@ function CategoriesTab({ msg, setMsg }) {
       .select('*')
       .order('sort_order', { ascending: true })
 
-    if (error) {
-      // 테이블이 없을 수 있음 - 기본 카테고리를 로컬로 표시
-      setCategories([])
-      setLoading(false)
-      return
-    }
+    if (error) { setAllCats([]); setLoading(false); return }
 
-    // DB에 카테고리가 하나도 없으면 기본값 자동 삽입
     if (!data || data.length === 0) {
-      const { data: inserted, error: seedErr } = await supabase
-        .from('app_categories')
-        .insert(DEFAULT_CATEGORIES)
-        .select()
-      if (!seedErr && inserted) {
-        setCategories(inserted)
-      } else {
-        // insert 실패 시 로컬 폴백
-        setCategories(DEFAULT_CATEGORIES)
-      }
+      const { data: inserted } = await supabase.from('app_categories').insert(DEFAULT_CATEGORIES).select()
+      setAllCats(inserted || DEFAULT_CATEGORIES)
     } else {
-      setCategories(data)
+      setAllCats(data)
     }
     setLoading(false)
   }
 
-  const handleSeedDefaults = async () => {
-    if (!confirm('기본 카테고리 7개를 추가하시겠습니까?\n(이미 있는 ID는 건너뜁니다)')) return
-    setSeeding(true)
-    const existingIds = new Set(categories.map(c => c.id))
-    const toInsert = DEFAULT_CATEGORIES.filter(c => !existingIds.has(c.id))
-    if (toInsert.length === 0) {
-      setMsg({ type: 'success', text: '이미 모든 기본 카테고리가 등록되어 있습니다.' })
-    } else {
-      const { error } = await supabase.from('app_categories').insert(toInsert)
-      if (error) {
-        setMsg({ type: 'error', text: '추가 실패: ' + error.message })
-      } else {
-        setMsg({ type: 'success', text: `기본 카테고리 ${toInsert.length}개 추가 완료!` })
-        fetchCategories()
-      }
-    }
-    setSeeding(false)
-    setTimeout(() => setMsg(null), 3000)
-  }
+  const parents = allCats.filter(c => !c.parent_id)
+  const getChildren = (parentId) => allCats.filter(c => c.parent_id === parentId)
 
   const handleAdd = async () => {
     if (!newId.trim() || !newLabel.trim()) {
@@ -322,65 +290,59 @@ function CategoriesTab({ msg, setMsg }) {
       setTimeout(() => setMsg(null), 3000)
       return
     }
-    if (categories.find(c => c.id === newId.trim())) {
+    if (allCats.find(c => c.id === newId.trim())) {
       setMsg({ type: 'error', text: '이미 존재하는 카테고리 ID입니다.' })
       setTimeout(() => setMsg(null), 3000)
       return
     }
-
     setSaving(true)
-    const { error } = await supabase
-      .from('app_categories')
-      .insert({
-        id: newId.trim(),
-        label: newLabel.trim(),
-        emoji: newEmoji.trim() || '📁',
-        sort_order: categories.length,
-      })
-
+    const payload = {
+      id: newId.trim(),
+      label: newLabel.trim(),
+      emoji: newEmoji.trim() || '📁',
+      sort_order: allCats.length,
+      parent_id: newParent || null,
+    }
+    const { error } = await supabase.from('app_categories').insert(payload)
     if (error) {
       setMsg({ type: 'error', text: '추가 실패: ' + error.message })
     } else {
-      setMsg({ type: 'success', text: `"${newLabel.trim()}" 카테고리 추가 완료!` })
-      setNewId('')
-      setNewLabel('')
-      setNewEmoji('')
+      setMsg({ type: 'success', text: `"${newLabel.trim()}" 추가 완료!` })
+      setNewId(''); setNewLabel(''); setNewEmoji(''); setNewParent('')
       fetchCategories()
     }
     setSaving(false)
     setTimeout(() => setMsg(null), 2000)
   }
 
-  const moveCategory = (index, direction) => {
-    const next = index + direction
-    if (next < 0 || next >= categories.length) return
-    const updated = [...categories]
-    ;[updated[index], updated[next]] = [updated[next], updated[index]]
-    setCategories(updated)
-    setOrderChanged(true)
-  }
-
-  const handleSaveOrder = async () => {
-    setSavingOrder(true)
-    const updates = categories.map((cat, i) =>
-      supabase.from('app_categories').update({ sort_order: i }).eq('id', cat.id)
-    )
-    await Promise.all(updates)
-    setSavingOrder(false)
-    setOrderChanged(false)
-    setMsg({ type: 'success', text: '카테고리 순서가 저장되었습니다!' })
-    setTimeout(() => setMsg(null), 2000)
-  }
-
   const handleDelete = async (catId, catLabel) => {
-    if (!confirm(`"${catLabel}" 카테고리를 삭제하시겠습니까?\n해당 카테고리의 앱은 삭제되지 않습니다.`)) return
+    const children = getChildren(catId)
+    const confirmMsg = children.length > 0
+      ? `"${catLabel}"과 하위 ${children.length}개도 함께 삭제됩니다. 계속하시겠습니까?`
+      : `"${catLabel}" 카테고리를 삭제하시겠습니까?`
+    if (!confirm(confirmMsg)) return
 
+    // 하위 카테고리도 삭제
+    if (children.length > 0) {
+      await supabase.from('app_categories').delete().eq('parent_id', catId)
+    }
     const { error } = await supabase.from('app_categories').delete().eq('id', catId)
     if (error) {
       setMsg({ type: 'error', text: '삭제 실패: ' + error.message })
     } else {
-      setCategories(prev => prev.filter(c => c.id !== catId))
-      setMsg({ type: 'success', text: `"${catLabel}" 카테고리 삭제 완료` })
+      setMsg({ type: 'success', text: `"${catLabel}" 삭제 완료` })
+      fetchCategories()
+    }
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  const handleReassign = async (childId, newParentId) => {
+    const { error } = await supabase.from('app_categories').update({ parent_id: newParentId || null }).eq('id', childId)
+    if (error) {
+      setMsg({ type: 'error', text: '재배정 실패: ' + error.message })
+    } else {
+      setMsg({ type: 'success', text: '재배정 완료!' })
+      fetchCategories()
     }
     setTimeout(() => setMsg(null), 2000)
   }
@@ -389,99 +351,76 @@ function CategoriesTab({ msg, setMsg }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      {/* 기본 카테고리 초기화 */}
-      {categories.length === 0 && (
-        <div style={{ border: '2px dashed #6c5ce7', borderRadius: 10, padding: '1.5rem', background: 'rgba(108,92,231,0.04)', textAlign: 'center' }}>
-          <p style={{ fontSize: '1.5rem', marginBottom: '0.5rem' }}>🏷️</p>
-          <p style={{ fontWeight: 700, marginBottom: '0.75rem' }}>카테고리가 없습니다</p>
-          <button onClick={handleSeedDefaults} disabled={seeding} style={S.btn('#6c5ce7', '#fff')}>
-            {seeding ? '추가 중...' : '📋 기본 카테고리 7개 한번에 추가'}
-          </button>
-        </div>
-      )}
-      {categories.length > 0 && categories.length < DEFAULT_CATEGORIES.length && (
-        <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-          <button onClick={handleSeedDefaults} disabled={seeding} style={S.btn('rgba(108,92,231,0.1)', '#6c5ce7', '1px solid rgba(108,92,231,0.3)')}>
-            {seeding ? '추가 중...' : '📋 빠진 기본 카테고리 추가'}
-          </button>
-        </div>
-      )}
-
       {/* 추가 폼 */}
       <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fafafa' }}>
         <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem' }}>➕ 새 카테고리 추가</p>
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <input
-            type="text"
-            placeholder="ID (영문, 예: science)"
-            value={newId}
-            onChange={e => setNewId(e.target.value)}
-            style={{ flex: 1, minWidth: 120, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }}
-          />
-          <input
-            type="text"
-            placeholder="이름 (예: 과학)"
-            value={newLabel}
-            onChange={e => setNewLabel(e.target.value)}
-            style={{ flex: 1, minWidth: 100, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }}
-          />
-          <input
-            type="text"
-            placeholder="이모지 (예: 🔬)"
-            value={newEmoji}
-            onChange={e => setNewEmoji(e.target.value)}
-            style={{ width: 70, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem', textAlign: 'center' }}
-          />
+          <input type="text" placeholder="ID (영문)" value={newId} onChange={e => setNewId(e.target.value)}
+            style={{ flex: 1, minWidth: 100, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }} />
+          <input type="text" placeholder="이름" value={newLabel} onChange={e => setNewLabel(e.target.value)}
+            style={{ flex: 1, minWidth: 80, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }} />
+          <input type="text" placeholder="이모지" value={newEmoji} onChange={e => setNewEmoji(e.target.value)}
+            style={{ width: 60, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem', textAlign: 'center' }} />
+          <select value={newParent} onChange={e => setNewParent(e.target.value)}
+            style={{ padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }}>
+            <option value="">최상위 카테고리</option>
+            {parents.map(p => <option key={p.id} value={p.id}>↳ {p.label} 하위</option>)}
+          </select>
           <button onClick={handleAdd} disabled={saving} style={S.btn('#00b894', '#fff')}>
             {saving ? '추가 중...' : '✅ 추가'}
           </button>
         </div>
       </div>
 
-      {/* 카테고리 목록 */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <p style={{ fontSize: '0.85rem', color: '#888', margin: 0 }}>등록된 카테고리 {categories.length}개</p>
-        {orderChanged && (
-          <button onClick={handleSaveOrder} disabled={savingOrder} style={S.btn('#6c5ce7', '#fff')}>
-            {savingOrder ? '저장 중...' : '💾 순서 저장'}
-          </button>
-        )}
-      </div>
-      {categories.length === 0 ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#888', border: '1px dashed #ddd', borderRadius: 8 }}>
-          <p style={{ fontSize: '2rem' }}>🏷️</p>
-          <p>등록된 카테고리가 없습니다.</p>
-        </div>
-      ) : (
-        categories.map((cat, index) => (
-          <div key={cat.id} style={{ ...S.card, alignItems: 'center' }}>
-            {/* 순서 버튼 */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 2, flexShrink: 0 }}>
-              <button
-                onClick={() => moveCategory(index, -1)}
-                disabled={index === 0}
-                style={{ ...S.btn('rgba(108,92,231,0.08)', '#6c5ce7', '1px solid rgba(108,92,231,0.2)'), padding: '2px 7px', opacity: index === 0 ? 0.3 : 1 }}
-              >▲</button>
-              <button
-                onClick={() => moveCategory(index, 1)}
-                disabled={index === categories.length - 1}
-                style={{ ...S.btn('rgba(108,92,231,0.08)', '#6c5ce7', '1px solid rgba(108,92,231,0.2)'), padding: '2px 7px', opacity: index === categories.length - 1 ? 0.3 : 1 }}
-              >▼</button>
-            </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 3 }}>
-                <span style={{ fontSize: '1.1rem' }}>{cat.emoji || '📁'}</span>
-                {cat.label}
+      {/* 카테고리 트리 목록 */}
+      <p style={{ fontSize: '0.85rem', color: '#888' }}>전체 카테고리 {allCats.length}개 (상위 {parents.length}개)</p>
+      {parents.map((cat) => {
+        const children = getChildren(cat.id)
+        const isOpen = expandedParent === cat.id
+        return (
+          <div key={cat.id}>
+            <div style={{ ...S.card, alignItems: 'center' }}>
+              {children.length > 0 && (
+                <button onClick={() => setExpandedParent(isOpen ? null : cat.id)}
+                  style={{ ...S.btn('rgba(108,92,231,0.08)', '#6c5ce7', '1px solid rgba(108,92,231,0.2)'), padding: '4px 8px', fontSize: '0.75rem' }}>
+                  {isOpen ? '▼' : '▶'} {children.length}
+                </button>
+              )}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: '0.95rem', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: 3 }}>
+                  <span style={{ fontSize: '1.1rem' }}>{cat.emoji || '📁'}</span>
+                  {cat.label}
+                  {children.length > 0 && <span style={{ fontSize: '0.7rem', color: '#6c5ce7', background: 'rgba(108,92,231,0.1)', padding: '1px 6px', borderRadius: 4 }}>하위 {children.length}개</span>}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+                  ID: <code style={{ background: 'rgba(108,92,231,0.08)', color: '#6c5ce7', padding: '1px 5px', borderRadius: 3 }}>{cat.id}</code>
+                </div>
               </div>
-              <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
-                ID: <code style={{ background: 'rgba(108,92,231,0.08)', color: '#6c5ce7', padding: '1px 5px', borderRadius: 3, fontSize: '0.75rem' }}>{cat.id}</code>
-                {` · 순서 ${index + 1}번`}
-              </div>
+              <button onClick={() => handleDelete(cat.id, cat.label)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️</button>
             </div>
-            <button onClick={() => handleDelete(cat.id, cat.label)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️ 삭제</button>
+            {/* 하위 카테고리 */}
+            {isOpen && children.map(child => (
+              <div key={child.id} style={{ ...S.card, alignItems: 'center', marginLeft: '2rem', marginTop: '0.3rem', borderLeft: '3px solid #6c5ce7' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: 600, fontSize: '0.88rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span>{child.emoji || '📁'}</span> {child.label}
+                  </div>
+                  <div style={{ fontSize: '0.72rem', color: '#aaa' }}>ID: {child.id}</div>
+                </div>
+                <select
+                  value={child.parent_id || ''}
+                  onChange={e => handleReassign(child.id, e.target.value)}
+                  style={{ padding: '0.3rem 0.5rem', border: '1px solid #d1d5db', borderRadius: 5, fontSize: '0.75rem' }}
+                >
+                  <option value="">최상위로 이동</option>
+                  {parents.filter(p => p.id !== child.id).map(p => <option key={p.id} value={p.id}>{p.label} 하위</option>)}
+                </select>
+                <button onClick={() => handleDelete(child.id, child.label)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️</button>
+              </div>
+            ))}
           </div>
-        ))
-      )}
+        )
+      })}
     </div>
   )
 }

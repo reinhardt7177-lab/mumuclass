@@ -59,6 +59,8 @@ function EditModal({ app, onClose, onSaved }) {
   const [sub2Img, setSub2Img] = useState(null)
   const [sub2Preview, setSub2Preview] = useState(null)
   const [categories, setCategories] = useState(FALLBACK_CATEGORIES)
+  const [tagInput, setTagInput] = useState('')
+  const [appTags, setAppTags] = useState(app.tags || [])
 
   useEffect(() => {
     const fetchCats = async () => {
@@ -107,6 +109,7 @@ function EditModal({ app, onClose, onSaved }) {
         preview_url: form.preview_url.trim(),
         category: form.category,
         creator_name: form.creator_name.trim(),
+        tags: appTags,
       }
       if (mainImg) updates.screenshot_url = await uploadImg(mainImg, 'main')
       if (sub1Img) updates.sub_image_1 = await uploadImg(sub1Img, 'sub')
@@ -149,6 +152,28 @@ function EditModal({ app, onClose, onSaved }) {
             <select className="upload-select" name="category" value={form.category} onChange={handleChange}>
               {categories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">태그</label>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+              {appTags.map((t, i) => (
+                <span key={i} style={{ background: 'rgba(108,92,231,0.15)', color: '#a29bfe', padding: '2px 8px', borderRadius: 12, fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}>
+                  #{t}
+                  <button type="button" onClick={() => setAppTags(prev => prev.filter((_, j) => j !== i))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e74c3c', fontSize: '0.75rem', padding: 0 }}>✕</button>
+                </span>
+              ))}
+            </div>
+            <input className="upload-input" type="text" value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => {
+                if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                  e.preventDefault()
+                  if (!appTags.includes(tagInput.trim())) setAppTags(prev => [...prev, tagInput.trim()])
+                  setTagInput('')
+                }
+              }}
+              placeholder="태그 입력 후 Enter (예: 체육, 1학년)" />
           </div>
           <div className="upload-field">
             <label className="upload-label">제작자 이름</label>
@@ -314,6 +339,13 @@ export default function AppDetail() {
               {app.category && <span className="retro-detail__stat retro-detail__stat--cat">{app.category}</span>}
               {app.creator_name && <span className="retro-detail__stat">by {app.creator_name}</span>}
             </div>
+            {app.tags && app.tags.length > 0 && (
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                {app.tags.map((t, i) => (
+                  <span key={i} style={{ background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', padding: '2px 8px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 600 }}>#{t}</span>
+                ))}
+              </div>
+            )}
           </div>
           {isOwner && (
             <div className="retro-detail__header-actions">

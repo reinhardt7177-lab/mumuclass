@@ -58,6 +58,8 @@ function UploadModal({ user, onClose, onUploaded, uploadCategories }) {
   const [sub1Preview, setSub1Preview] = useState(null)
   const [sub2Img, setSub2Img] = useState(null)
   const [sub2Preview, setSub2Preview] = useState(null)
+  const [tagInput, setTagInput] = useState('')
+  const [tags, setFormTags] = useState([])
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -102,6 +104,7 @@ function UploadModal({ user, onClose, onUploaded, uploadCategories }) {
         sub_image_1: sub1Url,
         sub_image_2: sub2Url,
         category: form.category,
+        tags: tags.length > 0 ? tags : [],
         creator_name: form.creator_name.trim() ||
           user?.user_metadata?.display_name ||
           user?.email?.split('@')[0] || '익명',
@@ -159,6 +162,29 @@ function UploadModal({ user, onClose, onUploaded, uploadCategories }) {
             <select className="upload-select" name="category" value={form.category} onChange={handleChange}>
               {uploadCategories.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
+          </div>
+          <div className="upload-field">
+            <label className="upload-label">태그</label>
+            <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap', marginBottom: '0.4rem' }}>
+              {tags.map((t, i) => (
+                <span key={i} style={{ background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', padding: '2px 8px', borderRadius: 12, fontSize: '0.78rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 3 }}>
+                  #{t}
+                  <button type="button" onClick={() => setFormTags(prev => prev.filter((_, j) => j !== i))}
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#e74c3c', fontSize: '0.75rem', padding: 0 }}>✕</button>
+                </span>
+              ))}
+            </div>
+            <input className="upload-input" type="text" value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => {
+                if ((e.key === 'Enter' || e.key === ',') && tagInput.trim()) {
+                  e.preventDefault()
+                  if (!tags.includes(tagInput.trim())) setFormTags(prev => [...prev, tagInput.trim()])
+                  setTagInput('')
+                }
+              }}
+              placeholder="태그 입력 후 Enter (예: 체육, 1학년, PAPS)" />
+            <span className="upload-hint" style={{ fontSize: '0.7rem', color: '#aaa' }}>Enter 또는 쉼표로 태그 추가</span>
           </div>
           <div className="upload-field">
             <label className="upload-label">제작자 이름</label>
@@ -253,6 +279,8 @@ export default function HomePage() {
   const [showUpload, setShowUpload] = useState(false)
   const [tags, setTags] = useState(FALLBACK_TAGS)
   const [uploadCategories, setUploadCategories] = useState(FALLBACK_TAGS.filter(t => t !== 'BEST 바이브앱'))
+  const [catTree, setCatTree] = useState([]) // 계층 카테고리 트리
+  const [subOpen, setSubOpen] = useState(false) // 교과 드롭다운 열림
   const { user } = useAuth()
 
   // DB에서 카테고리 가져오기
@@ -263,9 +291,19 @@ export default function HomePage() {
         .select('*')
         .order('sort_order', { ascending: true })
       if (data && data.length > 0) {
-        const catLabels = data.map(c => c.label)
-        setTags(['BEST 바이브앱', ...catLabels])
-        setUploadCategories(catLabels)
+        // 부모 카테고리(parent_id null)와 하위 카테고리 분리
+        const parents = data.filter(c => !c.parent_id)
+        const children = data.filter(c => c.parent_id)
+        const tree = parents.map(p => ({
+          ...p,
+          children: children.filter(c => c.parent_id === p.id),
+        }))
+        setCatTree(tree)
+        // 모든 카테고리 라벨 (업로드용)
+        const allLabels = data.map(c => c.label)
+        setUploadCategories(allLabels)
+        // 탭용: 부모만 + BEST
+        setTags(['BEST 바이브앱', ...parents.map(p => p.label)])
       }
     }
     fetchCategories()
@@ -285,6 +323,10 @@ export default function HomePage() {
 
   useEffect(() => { fetchApps() }, [fetchApps])
 
+  // 현재 탭의 하위 카테고리 찾기
+  const activeParent = catTree.find(p => p.label === activeTag)
+  const hasChildren = activeParent && activeParent.children.length > 0
+
   const displayApps = (() => {
     if (activeTag === 'BEST 바이브앱') {
       return [...apps]
@@ -295,6 +337,11 @@ export default function HomePage() {
           return (b.view_count || 0) - (a.view_count || 0)
         })
     }
+    // 하위 카테고리가 있으면 모든 하위의 앱도 포함
+    if (hasChildren) {
+      const childLabels = activeParent.children.map(c => c.label)
+      return apps.filter((app) => app.category === activeTag || childLabels.includes(app.category))
+    }
     return apps.filter((app) => app.category === activeTag)
   })()
 
@@ -303,13 +350,49 @@ export default function HomePage() {
       <div className="retro-page">
         <nav className="retro-nav">
           <div className="retro-nav__tabs">
-            {tags.map((tag) => (
-              <button
-                key={tag}
-                className={`retro-nav__item ${activeTag === tag ? 'retro-nav__item--active' : ''}`}
-                onClick={() => setActiveTag(tag)}
-              >{tag}</button>
-            ))}
+            {tags.map((tag) => {
+              const parent = catTree.find(p => p.label === tag)
+              const hasSub = parent && parent.children.length > 0
+              const childLabels = hasSub ? parent.children.map(c => c.label) : []
+              const isActive = activeTag === tag || childLabels.includes(activeTag)
+
+              if (hasSub) {
+                return (
+                  <div key={tag} className="retro-nav__dropdown"
+                    onMouseEnter={() => setSubOpen(tag)}
+                    onMouseLeave={() => setSubOpen(false)}
+                  >
+                    <button
+                      className={`retro-nav__item ${isActive ? 'retro-nav__item--active' : ''}`}
+                      onClick={() => { setActiveTag(tag); setSubOpen(false) }}
+                    >{tag} ▾</button>
+                    {subOpen === tag && (
+                      <div className="retro-nav__sub">
+                        <button
+                          className={`retro-nav__sub-item ${activeTag === tag ? 'retro-nav__sub-item--active' : ''}`}
+                          onClick={() => { setActiveTag(tag); setSubOpen(false) }}
+                        >전체</button>
+                        {parent.children.map(child => (
+                          <button
+                            key={child.id}
+                            className={`retro-nav__sub-item ${activeTag === child.label ? 'retro-nav__sub-item--active' : ''}`}
+                            onClick={() => { setActiveTag(child.label); setSubOpen(false) }}
+                          >{child.emoji || ''} {child.label}</button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              }
+
+              return (
+                <button
+                  key={tag}
+                  className={`retro-nav__item ${activeTag === tag ? 'retro-nav__item--active' : ''}`}
+                  onClick={() => setActiveTag(tag)}
+                >{tag}</button>
+              )
+            })}
           </div>
           <button className="retro-nav__upload" onClick={() => setShowUpload(true)}>
             ＋ 앱 올리기

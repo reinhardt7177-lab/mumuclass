@@ -1466,6 +1466,35 @@ img { max-width: 100%; }
 .retro-nav__item:hover { background: #555; color: white; }
 .retro-nav__item--active { background: #f8f9fa; color: #d35400; border-bottom: 2px solid #d35400; }
 /* 업로드 버튼 – 탭바 맨 오른쪽 */
+/* Category dropdown */
+.retro-nav__dropdown { position: relative; display: flex; }
+.retro-nav__sub {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: #2e2e2e;
+  border: 1px solid #555;
+  border-radius: 0 0 8px 8px;
+  min-width: 140px;
+  z-index: 100;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+}
+.retro-nav__sub-item {
+  display: block;
+  width: 100%;
+  padding: 0.55rem 1rem;
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+.retro-nav__sub-item:hover { background: rgba(255,255,255,0.1); }
+.retro-nav__sub-item--active { color: #f39c12; background: rgba(243,156,18,0.12); }
+
 .retro-nav__upload { flex: 0 0 auto; display: flex; align-items: center; padding: 0.6rem 1.2rem; height: 100%; color: #00ffe7; font-size: 0.85rem; font-weight: 800; background: transparent; border: none; border-left: 1px solid #555; cursor: pointer; letter-spacing: 0.04em; white-space: nowrap; text-shadow: 0 0 6px #00ffe7, 0 0 14px #00ffe7; transition: text-shadow 0.2s, background 0.15s; }
 .retro-nav__upload:hover { background: rgba(0,255,231,0.1); text-shadow: 0 0 8px #00ffe7, 0 0 20px #00ffe7, 0 0 36px #00ffe7; }
 
