@@ -2955,6 +2955,45 @@ img { max-width: 100%; }
   font-size: 0.65rem;
 }
 
+/* ── 홈페이지 방문자 배너 (중앙) ── */
+.home-visitor-banner {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem 1rem;
+  background: #1a1a2e;
+}
+.home-visitor-banner__counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.6rem 2rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+.home-visitor-banner__item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.home-visitor-banner__label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #999;
+  letter-spacing: 0.5px;
+}
+.home-visitor-banner__num {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #f39c12;
+}
+.home-visitor-banner__divider {
+  color: #666;
+  font-size: 0.85rem;
+}
+
 /* ═══════════════════════════════════════════
    실시간 채팅 위젯 (레트로 스타일)
    ═══════════════════════════════════════════ */

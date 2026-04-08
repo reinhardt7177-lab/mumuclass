@@ -10,6 +10,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
+import { useVisitorCount } from './Nav'
 import { Footer } from './Footer'
 
 const FALLBACK_TAGS = ['BEST 바이브앱', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
@@ -282,6 +283,7 @@ export default function HomePage() {
   const [catTree, setCatTree] = useState([]) // 계층 카테고리 트리
   const [subOpen, setSubOpen] = useState(false) // 교과 드롭다운 열림
   const { user } = useAuth()
+  const { todayCount, totalCount } = useVisitorCount()
 
   // DB에서 카테고리 가져오기
   useEffect(() => {
@@ -411,6 +413,23 @@ export default function HomePage() {
           )}
         </div>
       </div>
+
+      {/* 방문자 카운터 - 중앙 배치 */}
+      {todayCount !== null && (
+        <div className="home-visitor-banner">
+          <div className="home-visitor-banner__counter">
+            <span className="home-visitor-banner__item">
+              <span className="home-visitor-banner__label">TODAY</span>
+              <span className="home-visitor-banner__num">{todayCount.toLocaleString()}</span>
+            </span>
+            <span className="home-visitor-banner__divider">|</span>
+            <span className="home-visitor-banner__item">
+              <span className="home-visitor-banner__label">TOTAL</span>
+              <span className="home-visitor-banner__num">{(totalCount ?? 0).toLocaleString()}</span>
+            </span>
+          </div>
+        </div>
+      )}
 
       <Footer />
 

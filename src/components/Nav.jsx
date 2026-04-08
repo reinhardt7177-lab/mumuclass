@@ -11,7 +11,7 @@ const links = [
   { path: '/community', label: '커뮤니티' },
 ]
 
-function useVisitorCount() {
+export function useVisitorCount() {
   const [todayCount, setTodayCount] = useState(null)
   const [totalCount, setTotalCount] = useState(null)
 
