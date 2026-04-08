@@ -518,6 +518,147 @@ function VisitorsTab({ msg, setMsg }) {
   )
 }
 
+/* ── 회원 관리 탭 ── */
+function MembersTab({ msg, setMsg }) {
+  const [members, setMembers] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [stats, setStats] = useState({})
+
+  useEffect(() => { fetchMembers() }, [])
+
+  const fetchMembers = async () => {
+    setLoading(true)
+
+    // user_profiles 뷰에서 회원 목록 가져오기
+    const { data: users, error } = await supabase
+      .from('user_profiles')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (error) {
+      // 뷰가 없으면 앱/리뷰 테이블에서 유저 정보 집계
+      const [{ data: appData }, { data: reviewData }, { data: chatData }] = await Promise.all([
+        supabase.from('apps').select('creator_email, creator_name, created_at'),
+        supabase.from('app_reviews').select('user_email, user_name, created_at'),
+        supabase.from('chat_messages').select('user_id, user_name, created_at'),
+      ])
+
+      const userMap = {}
+      ;(appData || []).forEach(a => {
+        if (a.creator_email) {
+          if (!userMap[a.creator_email]) userMap[a.creator_email] = { email: a.creator_email, name: a.creator_name || '익명', apps: 0, reviews: 0, chats: 0, first_seen: a.created_at }
+          userMap[a.creator_email].apps++
+          if (a.created_at < userMap[a.creator_email].first_seen) userMap[a.creator_email].first_seen = a.created_at
+        }
+      })
+      ;(reviewData || []).forEach(r => {
+        if (r.user_email) {
+          if (!userMap[r.user_email]) userMap[r.user_email] = { email: r.user_email, name: r.user_name || '익명', apps: 0, reviews: 0, chats: 0, first_seen: r.created_at }
+          userMap[r.user_email].reviews++
+        }
+      })
+
+      setMembers(Object.values(userMap).sort((a, b) => new Date(b.first_seen) - new Date(a.first_seen)))
+      setStats({ total: Object.keys(userMap).length, method: 'fallback' })
+      setLoading(false)
+      return
+    }
+
+    // 유저별 활동 통계
+    const [{ data: appData }, { data: reviewData }] = await Promise.all([
+      supabase.from('apps').select('creator_email'),
+      supabase.from('app_reviews').select('user_email'),
+    ])
+
+    const appCount = {}
+    ;(appData || []).forEach(a => { if (a.creator_email) appCount[a.creator_email] = (appCount[a.creator_email] || 0) + 1 })
+    const reviewCount = {}
+    ;(reviewData || []).forEach(r => { if (r.user_email) reviewCount[r.user_email] = (reviewCount[r.user_email] || 0) + 1 })
+
+    const enriched = (users || []).map(u => ({
+      ...u,
+      name: u.display_name || u.email?.split('@')[0] || '익명',
+      apps: appCount[u.email] || 0,
+      reviews: reviewCount[u.email] || 0,
+    }))
+
+    setMembers(enriched)
+    setStats({ total: enriched.length, method: 'view' })
+    setLoading(false)
+  }
+
+  if (loading) return <p style={{ color: '#888', padding: '2rem' }}>불러오는 중...</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      {/* 요약 */}
+      <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 140, border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fff', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: 4 }}>총 회원 수</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#6c5ce7' }}>{stats.total?.toLocaleString()}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: 140, border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fff', textAlign: 'center' }}>
+          <div style={{ fontSize: '0.75rem', color: '#aaa', marginBottom: 4 }}>앱 등록 회원</div>
+          <div style={{ fontSize: '1.8rem', fontWeight: 900, color: '#00b894' }}>{members.filter(m => m.apps > 0).length}</div>
+        </div>
+      </div>
+
+      {stats.method === 'fallback' && (
+        <div style={{ padding: '0.6rem 1rem', borderRadius: 6, fontSize: '0.78rem', background: 'rgba(243,156,18,0.1)', border: '1px solid rgba(243,156,18,0.3)', color: '#f39c12' }}>
+          ⚠️ user_profiles 뷰가 없어 활동 데이터에서 회원 정보를 집계했습니다. Supabase에서 SQL을 실행하면 전체 회원 목록을 볼 수 있습니다.
+        </div>
+      )}
+
+      <p style={{ fontSize: '0.85rem', color: '#888' }}>전체 회원 {members.length}명</p>
+
+      {members.length === 0 && <p style={{ color: '#aaa', textAlign: 'center', padding: '2rem' }}>가입한 회원이 없습니다.</p>}
+
+      {/* 회원 목록 */}
+      {members.map((m, idx) => (
+        <div key={m.id || m.email || idx} style={{ ...S.card, alignItems: 'center' }}>
+          <div style={{
+            width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
+            background: `hsl(${(m.name || '').charCodeAt(0) * 37 % 360}, 60%, 65%)`,
+            color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontWeight: 800, fontSize: '1rem',
+          }}>
+            {(m.name || '?').charAt(0).toUpperCase()}
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 700, fontSize: '0.95rem', marginBottom: 2 }}>
+              {m.name || '익명'}
+            </div>
+            <div style={{ fontSize: '0.78rem', color: '#aaa', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <span>{m.email || '-'}</span>
+              {m.created_at && (
+                <span>가입: {new Date(m.created_at).toLocaleDateString('ko-KR')}</span>
+              )}
+              {m.last_sign_in_at && (
+                <span>최근접속: {new Date(m.last_sign_in_at).toLocaleDateString('ko-KR')}</span>
+              )}
+              {!m.created_at && m.first_seen && (
+                <span>첫 활동: {new Date(m.first_seen).toLocaleDateString('ko-KR')}</span>
+              )}
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+            {m.apps > 0 && (
+              <span style={{ background: 'rgba(108,92,231,0.1)', color: '#6c5ce7', padding: '3px 8px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 700 }}>
+                📱 앱 {m.apps}
+              </span>
+            )}
+            {m.reviews > 0 && (
+              <span style={{ background: 'rgba(0,184,148,0.1)', color: '#00b894', padding: '3px 8px', borderRadius: 12, fontSize: '0.72rem', fontWeight: 700 }}>
+                ⭐ 리뷰 {m.reviews}
+              </span>
+            )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 /* ── 메인 ── */
 export default function AdminPanel() {
   const { user, loading: authLoading } = useAuth()
@@ -541,7 +682,7 @@ export default function AdminPanel() {
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem' }}>
-        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리'], ['visitors', '👥 방문자']].map(([key, label]) => (
+        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리'], ['members', '👤 회원'], ['visitors', '👥 방문자']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: '0.88rem',
@@ -566,6 +707,7 @@ export default function AdminPanel() {
       {tab === 'approved' && <ApprovedTab msg={msg} setMsg={setMsg} />}
       {tab === 'reviews' && <ReviewsTab msg={msg} setMsg={setMsg} />}
       {tab === 'categories' && <CategoriesTab msg={msg} setMsg={setMsg} />}
+      {tab === 'members' && <MembersTab msg={msg} setMsg={setMsg} />}
       {tab === 'visitors' && <VisitorsTab msg={msg} setMsg={setMsg} />}
     </div>
   )
