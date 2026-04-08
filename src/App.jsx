@@ -16,6 +16,7 @@ import AdminPanel from './components/AdminPanel'
 import AppLabBoard from './components/AppLabBoard'
 import CreateAppRequest from './components/CreateAppRequest'
 import AppRequestDetail from './components/AppRequestDetail'
+import ChatWidget from './components/ChatWidget'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -84,6 +85,7 @@ export default function App() {
           } />
           <Route path="/admin" element={<AdminPanel />} />
         </Routes>
+        <ChatWidget />
       </AuthProvider>
     </BrowserRouter>
   )
