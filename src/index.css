@@ -3231,9 +3231,18 @@ img { max-width: 100%; }
 .chat-window__input {
   display: flex;
   gap: 0.5rem;
-  padding: 0.7rem;
+  padding: 0.5rem 0.7rem 0.7rem;
   border-top: 2px solid #2D2D4E;
   background: #16162B;
+  flex-wrap: wrap;
+}
+.chat-window__input-name {
+  width: 100%;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #A29BFE;
+  font-family: 'Courier New', monospace;
+  padding-left: 2px;
 }
 .chat-window__input input {
   flex: 1;
