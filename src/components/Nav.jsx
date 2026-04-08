@@ -52,8 +52,6 @@ export function Nav() {
   const navigate = useNavigate()
   const { user, signOut } = useAuth()
   const isAdmin = user?.email === ADMIN_EMAIL
-  const { todayCount, totalCount } = useVisitorCount()
-
   useEffect(() => {
     const h = () => setScrolled(window.scrollY > 40)
     window.addEventListener('scroll', h, { passive: true })
@@ -70,24 +68,9 @@ export function Nav() {
     <nav className={`retro-topbar ${scrolled ? 'nav--scrolled' : ''}`}>
       <div className="retro-topbar__inner">
         <Link to="/" onClick={() => setMenuOpen(false)} style={{ textDecoration: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <img src="/favicon.svg" alt="Mumuclass Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
-              <span className="retro-topbar__brand">무궁무진 클래스</span>
-            </span>
-            {todayCount !== null && (
-              <span className="visitor-counter">
-                <span className="visitor-counter__item">
-                  <span className="visitor-counter__label">TODAY</span>
-                  <span className="visitor-counter__num">{todayCount.toLocaleString()}</span>
-                </span>
-                <span className="visitor-counter__divider">|</span>
-                <span className="visitor-counter__item">
-                  <span className="visitor-counter__label">TOTAL</span>
-                  <span className="visitor-counter__num">{(totalCount ?? 0).toLocaleString()}</span>
-                </span>
-              </span>
-            )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <img src="/favicon.svg" alt="Mumuclass Logo" style={{ width: '28px', height: '28px', borderRadius: '4px' }} />
+            <span className="retro-topbar__brand">무궁무진 클래스</span>
           </div>
         </Link>
       </div>
