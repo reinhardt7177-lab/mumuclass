@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/naver065b8580cb06cb244e1a03baebd56e65.html", "destination": "/naver065b8580cb06cb244e1a03baebd56e65.html" },
+    { "source": "/googleea4247e16ac2efd8.html", "destination": "/googleea4247e16ac2efd8.html" },
     { "source": "/(.*)", "destination": "/" }
   ]
 }
