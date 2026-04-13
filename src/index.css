@@ -3160,8 +3160,8 @@ img { max-width: 100%; }
   bottom: 5.5rem;
   right: 1.5rem;
   z-index: 9998;
-  width: 400px;
-  max-height: 600px;
+  width: 520px;
+  max-height: 650px;
   background: linear-gradient(180deg, #1a2236 0%, #141c2e 100%);
   border: 1px solid rgba(91, 155, 213, 0.25);
   border-radius: 20px;
@@ -3251,6 +3251,22 @@ img { max-width: 100%; }
 }
 .suda-form__nick::placeholder { color: #5a6a80; }
 .suda-form__nick:focus { border-color: #5B9BD5; }
+
+.suda-form__pw {
+  width: 110px;
+  padding: 0.65rem 0.7rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s;
+  flex-shrink: 0;
+}
+.suda-form__pw::placeholder { color: #5a6a80; font-size: 0.75rem; }
+.suda-form__pw:focus { border-color: #5B9BD5; }
 
 .suda-form__img-btn {
   width: 48px; height: 48px;
@@ -3392,6 +3408,88 @@ img { max-width: 100%; }
   word-break: break-word;
   white-space: pre-wrap;
 }
+
+/* 삭제 버튼 */
+.suda-msg__delete {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: #6B7280;
+  font-size: 0.7rem;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.15s, color 0.15s;
+}
+.suda-msg:hover .suda-msg__delete { opacity: 1; }
+.suda-msg__delete:hover { color: #E17055; background: rgba(225, 112, 85, 0.15); }
+
+/* 삭제 비밀번호 모달 */
+.suda-delete-modal {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20px;
+}
+.suda-delete-modal__box {
+  background: #1e293b;
+  border: 1px solid rgba(91, 155, 213, 0.3);
+  border-radius: 14px;
+  padding: 1.5rem;
+  width: 280px;
+  text-align: center;
+}
+.suda-delete-modal__title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  margin: 0 0 0.8rem 0;
+}
+.suda-delete-modal__input {
+  width: 100%;
+  padding: 0.6rem 0.8rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: #e2e8f0;
+  font-size: 0.85rem;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 0.8rem;
+}
+.suda-delete-modal__input:focus { border-color: #5B9BD5; }
+.suda-delete-modal__btns {
+  display: flex;
+  gap: 0.5rem;
+}
+.suda-delete-modal__cancel {
+  flex: 1;
+  padding: 0.55rem;
+  background: rgba(255, 255, 255, 0.08);
+  color: #9CA3AF;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.suda-delete-modal__confirm {
+  flex: 1;
+  padding: 0.55rem;
+  background: #E17055;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.suda-delete-modal__confirm:hover { background: #c0392b; }
 
 /* 모바일 반응형 */
 @media (max-width: 480px) {

@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../supabaseClient'
+import { useAuth } from '../contexts/AuthContext'
+
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 /* ── 시간 포맷 (YYYY-MM-DD HH:mm) ── */
 const formatDateTime = (ts) => {
@@ -8,41 +11,56 @@ const formatDateTime = (ts) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`
 }
 
-/* ── 닉네임 색상 (닉네임 기반 고정 색상) ── */
+/* ── 닉네임 색상 ── */
 const NICK_COLORS = ['#5B9BD5', '#70C1B3', '#F4A261', '#E76F51', '#7EC8E3', '#C084FC', '#38BDF8', '#4ADE80', '#FB923C', '#F472B6']
 const getNickColor = (name) => NICK_COLORS[Math.abs([...name].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 0)) % NICK_COLORS.length]
 
+/* ── 간단 해시 (비밀번호 평문 저장 방지) ── */
+const simpleHash = (str) => {
+  let h = 0
+  for (let i = 0; i < str.length; i++) {
+    h = ((h << 5) - h + str.charCodeAt(i)) | 0
+  }
+  return 'h' + Math.abs(h).toString(36)
+}
+
 export default function ChatWidget() {
+  const { user } = useAuth()
+  const isAdmin = user?.email === ADMIN_EMAIL
+
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([])
   const [nickname, setNickname] = useState(() => localStorage.getItem('mumu_nick') || '')
   const [content, setContent] = useState('')
+  const [password, setPassword] = useState(() => localStorage.getItem('mumu_pw') || '')
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [sending, setSending] = useState(false)
   const [unread, setUnread] = useState(0)
   const [toast, setToast] = useState(null)
+  const [deleteTarget, setDeleteTarget] = useState(null) // 삭제 대상 메시지 id
+  const [deletePw, setDeletePw] = useState('')
 
   const listRef = useRef(null)
   const fileRef = useRef(null)
-  const textareaRef = useRef(null)
   const openRef = useRef(open)
 
   useEffect(() => { openRef.current = open }, [open])
 
-  // 닉네임 localStorage 저장
   useEffect(() => {
     if (nickname) localStorage.setItem('mumu_nick', nickname)
   }, [nickname])
 
-  // 토스트 자동 닫기
+  useEffect(() => {
+    if (password) localStorage.setItem('mumu_pw', password)
+  }, [password])
+
   useEffect(() => {
     if (!toast) return
     const t = setTimeout(() => setToast(null), 2500)
     return () => clearTimeout(t)
   }, [toast])
 
-  // 메시지 불러오기
   const fetchMessages = useCallback(async () => {
     const { data } = await supabase
       .from('mumu_chats')
@@ -52,7 +70,6 @@ export default function ChatWidget() {
     if (data) setMessages(data)
   }, [])
 
-  // 최초 로드 + Realtime
   useEffect(() => {
     fetchMessages()
 
@@ -65,7 +82,6 @@ export default function ChatWidget() {
       }, (payload) => {
         setMessages(prev => {
           if (prev.some(m => m.id === payload.new.id)) return prev
-          // 낙관적 메시지 교체
           const tempIdx = prev.findIndex(m => m._temp && m._tempKey === payload.new.content + payload.new.nickname)
           if (tempIdx !== -1) {
             const updated = [...prev]
@@ -76,12 +92,18 @@ export default function ChatWidget() {
         })
         if (!openRef.current) setUnread(prev => prev + 1)
       })
+      .on('postgres_changes', {
+        event: 'DELETE',
+        schema: 'public',
+        table: 'mumu_chats'
+      }, (payload) => {
+        setMessages(prev => prev.filter(m => m.id !== payload.old.id))
+      })
       .subscribe()
 
     return () => { supabase.removeChannel(channel) }
   }, [fetchMessages])
 
-  // 채팅 열 때 스크롤 탑으로
   useEffect(() => {
     if (open && listRef.current) listRef.current.scrollTop = 0
   }, [open])
@@ -91,24 +113,18 @@ export default function ChatWidget() {
     if (!open) setUnread(0)
   }
 
-  // 이미지 선택
   const handleImageSelect = (file) => {
     if (!file || !file.type.startsWith('image/')) return
-    if (file.size > 5 * 1024 * 1024) {
-      setToast('이미지 크기는 5MB 이하만 가능합니다.')
-      return
-    }
+    if (file.size > 5 * 1024 * 1024) { setToast('이미지 크기는 5MB 이하만 가능합니다.'); return }
     setImageFile(file)
     setImagePreview(URL.createObjectURL(file))
   }
 
-  // 파일 탐색기에서 선택
   const handleFileChange = (e) => {
     handleImageSelect(e.target.files[0])
     e.target.value = ''
   }
 
-  // 붙여넣기로 이미지 첨부
   const handlePaste = (e) => {
     const items = e.clipboardData?.items
     if (!items) return
@@ -121,7 +137,6 @@ export default function ChatWidget() {
     }
   }
 
-  // 이미지 업로드
   const uploadImage = async (file) => {
     const ext = file.name?.split('.').pop() || 'png'
     const path = `mumu-chats/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
@@ -131,7 +146,6 @@ export default function ChatWidget() {
     return data.publicUrl
   }
 
-  // 이미지 미리보기 제거
   const removeImage = () => {
     setImageFile(null)
     setImagePreview(null)
@@ -152,9 +166,9 @@ export default function ChatWidget() {
         nickname: nickname.trim(),
         content: content.trim(),
         image_url,
+        password: password.trim() ? simpleHash(password.trim()) : null,
       }
 
-      // 낙관적 업데이트
       const tempMsg = {
         id: 'temp-' + Date.now(),
         _temp: true,
@@ -178,9 +192,48 @@ export default function ChatWidget() {
     setSending(false)
   }
 
+  // 삭제
+  const handleDelete = async (msgId) => {
+    const msg = messages.find(m => m.id === msgId)
+    if (!msg) return
+
+    // 관리자는 비밀번호 없이 삭제 가능
+    if (isAdmin) {
+      const { error } = await supabase.from('mumu_chats').delete().eq('id', msgId)
+      if (error) { setToast('삭제 실패: ' + error.message); return }
+      setMessages(prev => prev.filter(m => m.id !== msgId))
+      setToast('관리자 권한으로 삭제 완료')
+      setDeleteTarget(null)
+      return
+    }
+
+    // 일반 사용자: 비밀번호 확인
+    if (!msg.password) {
+      setToast('비밀번호 없이 작성된 글은 삭제할 수 없습니다.')
+      setDeleteTarget(null)
+      return
+    }
+
+    if (!deletePw.trim()) {
+      setToast('비밀번호를 입력해 주세요.')
+      return
+    }
+
+    if (simpleHash(deletePw.trim()) !== msg.password) {
+      setToast('비밀번호가 일치하지 않습니다.')
+      return
+    }
+
+    const { error } = await supabase.from('mumu_chats').delete().eq('id', msgId)
+    if (error) { setToast('삭제 실패: ' + error.message); return }
+    setMessages(prev => prev.filter(m => m.id !== msgId))
+    setToast('삭제 완료!')
+    setDeleteTarget(null)
+    setDeletePw('')
+  }
+
   return (
     <>
-      {/* 플로팅 버블 */}
       <button className="suda-bubble" onClick={toggleChat} aria-label="수다방 열기">
         <span className="suda-bubble__icon">{open ? '✕' : '💬'}</span>
         {unread > 0 && !open && (
@@ -188,13 +241,32 @@ export default function ChatWidget() {
         )}
       </button>
 
-      {/* 수다방 패널 */}
       {open && (
         <div className="suda-panel">
-          {/* 토스트 */}
           {toast && <div className="suda-toast">{toast}</div>}
 
-          {/* 헤더 */}
+          {/* 삭제 확인 모달 */}
+          {deleteTarget && !isAdmin && (
+            <div className="suda-delete-modal">
+              <div className="suda-delete-modal__box">
+                <p className="suda-delete-modal__title">🔒 삭제 비밀번호 입력</p>
+                <input
+                  type="password"
+                  className="suda-delete-modal__input"
+                  placeholder="글 작성 시 입력한 비밀번호"
+                  value={deletePw}
+                  onChange={e => setDeletePw(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter') handleDelete(deleteTarget) }}
+                  autoFocus
+                />
+                <div className="suda-delete-modal__btns">
+                  <button onClick={() => { setDeleteTarget(null); setDeletePw('') }} className="suda-delete-modal__cancel">취소</button>
+                  <button onClick={() => handleDelete(deleteTarget)} className="suda-delete-modal__confirm">삭제</button>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="suda-header">
             <div className="suda-header__top">
               <h2 className="suda-header__title">✨ 무무클래스 수다방</h2>
@@ -203,7 +275,6 @@ export default function ChatWidget() {
             <p className="suda-header__desc">자유롭게 주절주절. 오류나 추가 기능 요청도 환영합니다.</p>
           </div>
 
-          {/* 입력 폼 */}
           <form className="suda-form" onSubmit={handleSubmit}>
             <div className="suda-form__row">
               <input
@@ -212,6 +283,14 @@ export default function ChatWidget() {
                 placeholder="닉네임"
                 value={nickname}
                 onChange={e => setNickname(e.target.value)}
+                maxLength={20}
+              />
+              <input
+                className="suda-form__pw"
+                type="password"
+                placeholder="비번 (삭제용)"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
                 maxLength={20}
               />
               <button
@@ -229,7 +308,6 @@ export default function ChatWidget() {
               />
             </div>
 
-            {/* 이미지 미리보기 */}
             {imagePreview && (
               <div className="suda-form__preview">
                 <img src={imagePreview} alt="미리보기" />
@@ -238,7 +316,6 @@ export default function ChatWidget() {
             )}
 
             <textarea
-              ref={textareaRef}
               className="suda-form__content"
               placeholder="여기에 이미지 붙여넣기 가능! DB를 우회하는 수다방입니다."
               value={content}
@@ -252,7 +329,6 @@ export default function ChatWidget() {
             </button>
           </form>
 
-          {/* 메시지 리스트 */}
           <div className="suda-list" ref={listRef}>
             {messages.length === 0 && (
               <div className="suda-list__empty">
@@ -264,6 +340,17 @@ export default function ChatWidget() {
                 <div className="suda-msg__head">
                   <span className="suda-msg__nick" style={{ color: getNickColor(msg.nickname) }}>{msg.nickname}</span>
                   <span className="suda-msg__time">{formatDateTime(msg.created_at)}</span>
+                  {/* 삭제 버튼: 관리자 or 비번 있는 글 */}
+                  {(isAdmin || msg.password) && !msg._temp && (
+                    <button
+                      className="suda-msg__delete"
+                      onClick={() => {
+                        if (isAdmin) { handleDelete(msg.id) }
+                        else { setDeleteTarget(msg.id); setDeletePw('') }
+                      }}
+                      title={isAdmin ? '관리자 삭제' : '비밀번호로 삭제'}
+                    >✕</button>
+                  )}
                 </div>
                 {msg.image_url && (
                   <div className="suda-msg__img">
