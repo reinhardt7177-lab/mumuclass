@@ -238,7 +238,6 @@ function UploadModal({ user, onClose, onUploaded, uploadCategories }) {
 function AppCard({ app }) {
   const colors = { '학급관리': '#e17055', '수학': '#6c5ce7', '국어': '#00b894', '게임': '#e84393', '퍼즐': '#f39c12', '에듀테크': '#00cec9', '기타': '#636e72' }
   const color = colors[app.category] || '#636e72'
-  // screenshot_url이 http로 시작하면 사용, 아니면 preview_url로 썸네일 생성
   const thumbUrl = app.screenshot_url?.startsWith('http')
     ? app.screenshot_url
     : (app.preview_url ? toThumbUrl(app.preview_url) : '')
@@ -268,6 +267,40 @@ function AppCard({ app }) {
         )}
       </div>
       <div className="retro-card__name">{app.title}</div>
+    </Link>
+  )
+}
+
+/* ── 리스트형 앱 아이템 ── */
+function AppListItem({ app }) {
+  const CAT_COLORS = { '학급관리': '#e17055', '수학': '#6c5ce7', '국어': '#00b894', '게임': '#e84393', '퍼즐': '#f39c12', '에듀테크': '#00cec9', '기타': '#636e72', '교과': '#5B9BD5', '사회': '#f39c12', '체육': '#e84393' }
+  const color = CAT_COLORS[app.category] || '#636e72'
+  const initial = (app.title || '?').charAt(0)
+
+  return (
+    <Link to={`/apps/${app.id}`} className="app-list-item">
+      <div className="app-list-item__avatar" style={{ background: color }}>
+        {initial}
+      </div>
+      <div className="app-list-item__body">
+        <div className="app-list-item__top">
+          <span className="app-list-item__creator">{app.creator_name || '익명'}</span>
+          <span className="app-list-item__sep">/</span>
+          <span className="app-list-item__title">{app.title}</span>
+          {app.is_best && <span className="app-list-item__best">BEST</span>}
+          {app.rating > 0 && <span className="app-list-item__rating">★ {app.rating.toFixed(1)}</span>}
+        </div>
+        {app.one_line_desc && (
+          <p className="app-list-item__desc">{app.one_line_desc}</p>
+        )}
+        <div className="app-list-item__meta">
+          <span className="app-list-item__cat" style={{ color }}>{app.category || '기타'}</span>
+          {app.tags?.length > 0 && app.tags.slice(0, 3).map((t, i) => (
+            <span key={i} className="app-list-item__tag">#{t}</span>
+          ))}
+          <span className="app-list-item__views">👁 {app.view_count || 0}</span>
+        </div>
+      </div>
     </Link>
   )
 }
@@ -304,8 +337,8 @@ export default function HomePage() {
         // 모든 카테고리 라벨 (업로드용)
         const allLabels = data.map(c => c.label)
         setUploadCategories(allLabels)
-        // 탭용: 부모만 + BEST
-        setTags(['BEST 바이브앱', ...parents.map(p => p.label)])
+        // 탭용: BEST + 전체앱 + 부모카테고리
+        setTags(['BEST 바이브앱', '전체앱', ...parents.map(p => p.label)])
       }
     }
     fetchCategories()
@@ -329,6 +362,8 @@ export default function HomePage() {
   const activeParent = catTree.find(p => p.label === activeTag)
   const hasChildren = activeParent && activeParent.children.length > 0
 
+  const isListView = activeTag !== 'BEST 바이브앱'
+
   const displayApps = (() => {
     if (activeTag === 'BEST 바이브앱') {
       return [...apps]
@@ -338,6 +373,9 @@ export default function HomePage() {
           if (ratingDiff !== 0) return ratingDiff
           return (b.view_count || 0) - (a.view_count || 0)
         })
+    }
+    if (activeTag === '전체앱') {
+      return [...apps].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
     }
     // 하위 카테고리가 있으면 모든 하위의 앱도 포함
     if (hasChildren) {
@@ -406,6 +444,10 @@ export default function HomePage() {
             <div className="retro-loading"><span>⏳</span><p>앱을 불러오는 중...</p></div>
           ) : displayApps.length === 0 ? (
             <div className="retro-loading"><span>📦</span><p>앱이 없습니다</p></div>
+          ) : isListView ? (
+            <div className="app-list">
+              {displayApps.map((app) => <AppListItem key={app.id} app={app} />)}
+            </div>
           ) : (
             <div className="retro-grid">
               {displayApps.map((app) => <AppCard key={app.id} app={app} />)}
