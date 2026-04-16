@@ -362,7 +362,7 @@ export default function HomePage() {
   const activeParent = catTree.find(p => p.label === activeTag)
   const hasChildren = activeParent && activeParent.children.length > 0
 
-  const isListView = activeTag !== 'BEST 바이브앱'
+  const isListView = activeTag === '전체앱'
 
   const displayApps = (() => {
     if (activeTag === 'BEST 바이브앱') {
