@@ -977,6 +977,20 @@ img { max-width: 100%; }
   font-size: 0.8rem;
   color: var(--text-muted);
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+.footer__visitor {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  letter-spacing: 0.03em;
+}
+.footer__visitor strong {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 /* ===== Spinner ===== */
@@ -1441,7 +1455,135 @@ img { max-width: 100%; }
 /* ============================================================
    RETRO ARCADE "OLDGAMENARA" STYLE (Home & App Detail)
    ============================================================ */
-.retro-page { padding-top: 64px; min-height: 100vh; background: white; color: #333; }
+.retro-page { padding-top: 64px; min-height: 100vh; background: #f5f6fa; color: #333; }
+
+/* ── 히어로 배너 ── */
+.hero-banner {
+  background: linear-gradient(135deg, #2d1b69 0%, #11998e 50%, #38ef7d 100%);
+  padding: 2.5rem 1.5rem 2rem;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero-banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(255,255,255,0.1) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255,255,255,0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+.hero-banner__inner { position: relative; max-width: 600px; margin: 0 auto; }
+.hero-banner__title {
+  font-size: 1.8rem;
+  font-weight: 900;
+  color: #fff;
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.hero-banner__desc {
+  font-size: 0.92rem;
+  color: rgba(255,255,255,0.85);
+  margin: 0 0 1rem;
+  line-height: 1.6;
+}
+.hero-banner__stats {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.2rem;
+}
+.hero-banner__stat {
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+.hero-banner__dot {
+  width: 4px;
+  height: 4px;
+  background: rgba(255,255,255,0.5);
+  border-radius: 50%;
+}
+.hero-banner__cta {
+  background: #fff;
+  color: #2d1b69;
+  border: none;
+  padding: 0.6rem 1.8rem;
+  border-radius: 25px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+.hero-banner__cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+}
+@media (max-width: 600px) {
+  .hero-banner { padding: 1.8rem 1rem 1.5rem; }
+  .hero-banner__title { font-size: 1.35rem; }
+  .hero-banner__desc { font-size: 0.82rem; }
+}
+
+/* ── 검색바 ── */
+.retro-search {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1.2rem 1rem 0;
+}
+.retro-search__inner {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 0.5rem 1rem;
+  gap: 0.6rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.retro-search__inner:focus-within {
+  border-color: #6c5ce7;
+  box-shadow: 0 2px 12px rgba(108,92,231,0.12);
+}
+.retro-search__icon { font-size: 1rem; opacity: 0.5; flex-shrink: 0; }
+.retro-search__input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.88rem;
+  color: #333;
+  outline: none;
+  font-family: inherit;
+}
+.retro-search__input::placeholder { color: #aaa; }
+.retro-search__clear {
+  background: #e5e7eb;
+  border: none;
+  color: #666;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  font-size: 0.7rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.retro-search__clear:hover { background: #d1d5db; color: #333; }
+@media (max-width: 600px) {
+  .retro-search { padding: 0.8rem 0.6rem 0; }
+  .retro-search__input { font-size: 0.82rem; }
+}
 .retro-topbar {
   position: fixed;
   top: 0;
@@ -1528,7 +1670,7 @@ img { max-width: 100%; }
 .upload-img-picker { display: block; width: 100%; aspect-ratio: 16/9; background: #111; border: 2px dashed #444; border-radius: 4px; cursor: pointer; overflow: hidden; transition: border-color 0.2s; }
 .upload-img-picker:hover { border-color: #f39c12; }
 .upload-img-picker__placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; }
-.retro-content { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem; }
+.retro-content { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1rem 2rem; }
 .retro-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem 1rem; }
 @media (max-width: 900px) { .retro-grid { grid-template-columns: repeat(3, 1fr); gap: 1.5rem 1rem; } }
 @media (max-width: 600px) { .retro-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem 0.5rem; } }
@@ -1649,11 +1791,41 @@ img { max-width: 100%; }
   .app-list-item__desc { font-size: 0.78rem; }
 }
 
-.retro-card { display: flex; flex-direction: column; gap: 0.5rem; text-decoration: none; color: inherit; transition: transform 0.1s; }
-.retro-card:hover { transform: translateY(-2px); }
-.retro-card__img { width: 100%; aspect-ratio: 4/3; background: #000; border: 1px solid #ddd; overflow: hidden; box-shadow: 2px 2px 4px rgba(0,0,0,0.1); }
-.retro-card__img img { width: 100%; height: 100%; object-fit: cover; }
-.retro-card__name { font-size: 0.9rem; font-weight: 700; color: #222; text-align: left; line-height: 1.3; }
+.retro-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid #e8e8e8;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.retro-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+.retro-card__img { width: 100%; aspect-ratio: 4/3; background: #1a1a2e; overflow: hidden; position: relative; }
+.retro-card__img img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.retro-card:hover .retro-card__img img { transform: scale(1.03); }
+.retro-card__info { padding: 0.7rem 0.8rem 0.85rem; }
+.retro-card__name { font-size: 0.9rem; font-weight: 700; color: #222; line-height: 1.3; margin-bottom: 0.2rem; }
+.retro-card__creator { font-size: 0.72rem; color: #999; margin-bottom: 0.25rem; }
+.retro-card__desc {
+  font-size: 0.75rem;
+  color: #777;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+@media (max-width: 600px) {
+  .retro-card__info { padding: 0.5rem 0.6rem 0.65rem; }
+  .retro-card__name { font-size: 0.82rem; }
+  .retro-card__desc { display: none; }
+}
 /* 썸네일 없는 홈 카드 */
 .retro-card__img--no-thumb { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.4rem; background: #1a1a2e; border: 2px solid #555; }
 .retro-card__img-cat { font-size: 0.65rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; }

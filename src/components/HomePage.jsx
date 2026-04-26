@@ -266,7 +266,11 @@ function AppCard({ app }) {
           <span style={{ position: 'absolute', top: 6, left: 6, background: '#f39c12', color: '#000', fontSize: '0.65rem', fontWeight: 900, padding: '2px 6px', borderRadius: 3, zIndex: 2 }}>BEST</span>
         )}
       </div>
-      <div className="retro-card__name">{app.title}</div>
+      <div className="retro-card__info">
+        <div className="retro-card__name">{app.title}</div>
+        {app.creator_name && <div className="retro-card__creator">by {app.creator_name}</div>}
+        {app.one_line_desc && <div className="retro-card__desc">{app.one_line_desc}</div>}
+      </div>
     </Link>
   )
 }
@@ -315,6 +319,7 @@ export default function HomePage() {
   const [uploadCategories, setUploadCategories] = useState(FALLBACK_TAGS.filter(t => t !== 'BEST 바이브앱'))
   const [catTree, setCatTree] = useState([]) // 계층 카테고리 트리
   const [subOpen, setSubOpen] = useState(false) // 교과 드롭다운 열림
+  const [search, setSearch] = useState('')
   const { user } = useAuth()
   const { todayCount, totalCount } = useVisitorCount()
 
@@ -385,9 +390,31 @@ export default function HomePage() {
     return apps.filter((app) => app.category === activeTag)
   })()
 
+  const filteredApps = search.trim()
+    ? displayApps.filter(app =>
+        app.title?.toLowerCase().includes(search.toLowerCase()) ||
+        app.one_line_desc?.toLowerCase().includes(search.toLowerCase()) ||
+        app.creator_name?.toLowerCase().includes(search.toLowerCase())
+      )
+    : displayApps
+
   return (
     <>
       <div className="retro-page">
+        {/* 히어로 배너 */}
+        <div className="hero-banner">
+          <div className="hero-banner__inner">
+            <h1 className="hero-banner__title">교사를 위한 맞춤 앱 플랫폼</h1>
+            <p className="hero-banner__desc">교실에 필요한 앱을 만들고, 코딩 노하우와 에듀테크 인사이트를 나누는 교사 커뮤니티</p>
+            <div className="hero-banner__stats">
+              <span className="hero-banner__stat">{apps.length}개 앱</span>
+              <span className="hero-banner__dot" />
+              <span className="hero-banner__stat">{apps.filter(a => a.is_best).length}개 BEST</span>
+            </div>
+            <button className="hero-banner__cta" onClick={() => setShowUpload(true)}>+ 앱 올리기</button>
+          </div>
+        </div>
+
         <nav className="retro-nav">
           <div className="retro-nav__tabs">
             {tags.map((tag) => {
@@ -439,41 +466,41 @@ export default function HomePage() {
           </button>
         </nav>
 
+        {/* 검색바 */}
+        <div className="retro-search">
+          <div className="retro-search__inner">
+            <span className="retro-search__icon">🔍</span>
+            <input
+              className="retro-search__input"
+              type="text"
+              placeholder="앱 이름, 설명, 제작자로 검색..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+            {search && (
+              <button className="retro-search__clear" onClick={() => setSearch('')}>✕</button>
+            )}
+          </div>
+        </div>
+
         <div className="retro-content">
           {loading ? (
             <div className="retro-loading"><span>⏳</span><p>앱을 불러오는 중...</p></div>
-          ) : displayApps.length === 0 ? (
-            <div className="retro-loading"><span>📦</span><p>앱이 없습니다</p></div>
+          ) : filteredApps.length === 0 ? (
+            <div className="retro-loading"><span>📦</span><p>{search ? '검색 결과가 없습니다' : '앱이 없습니다'}</p></div>
           ) : isListView ? (
             <div className="app-list">
-              {displayApps.map((app) => <AppListItem key={app.id} app={app} />)}
+              {filteredApps.map((app) => <AppListItem key={app.id} app={app} />)}
             </div>
           ) : (
             <div className="retro-grid">
-              {displayApps.map((app) => <AppCard key={app.id} app={app} />)}
+              {filteredApps.map((app) => <AppCard key={app.id} app={app} />)}
             </div>
           )}
         </div>
       </div>
 
-      {/* 방문자 카운터 - 중앙 배치 */}
-      {todayCount !== null && (
-        <div className="home-visitor-banner">
-          <div className="home-visitor-banner__counter">
-            <span className="home-visitor-banner__item">
-              <span className="home-visitor-banner__label">TODAY</span>
-              <span className="home-visitor-banner__num">{todayCount.toLocaleString()}</span>
-            </span>
-            <span className="home-visitor-banner__divider">|</span>
-            <span className="home-visitor-banner__item">
-              <span className="home-visitor-banner__label">TOTAL</span>
-              <span className="home-visitor-banner__num">{(totalCount ?? 0).toLocaleString()}</span>
-            </span>
-          </div>
-        </div>
-      )}
-
-      <Footer />
+      <Footer todayCount={todayCount} totalCount={totalCount} />
 
       {showUpload && (
         <UploadModal user={user} onClose={() => setShowUpload(false)} onUploaded={fetchApps} uploadCategories={uploadCategories} />

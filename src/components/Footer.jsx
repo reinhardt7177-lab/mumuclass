@@ -1,4 +1,4 @@
-export function Footer() {
+export function Footer({ todayCount, totalCount }) {
   const columns = [
     { title: '서비스', links: ['앱 게시판', '교육상품', '커뮤니티'] },
     { title: '지원', links: ['도움말', '문의하기', '이용약관'] },
@@ -34,7 +34,14 @@ export function Footer() {
       </div>
 
       <div className="footer__bottom">
-        © 2026 무궁무진 클래스. All rights reserved.
+        <span>© 2026 무궁무진 클래스. All rights reserved.</span>
+        {todayCount !== null && todayCount !== undefined && (
+          <span className="footer__visitor">
+            TODAY <strong>{todayCount.toLocaleString()}</strong>
+            {' | '}
+            TOTAL <strong>{(totalCount ?? 0).toLocaleString()}</strong>
+          </span>
+        )}
       </div>
     </footer>
   )
