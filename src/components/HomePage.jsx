@@ -461,9 +461,6 @@ export default function HomePage() {
               )
             })}
           </div>
-          <button className="retro-nav__upload" onClick={() => setShowUpload(true)}>
-            ＋ 앱 올리기
-          </button>
         </nav>
 
         {/* 검색바 */}
