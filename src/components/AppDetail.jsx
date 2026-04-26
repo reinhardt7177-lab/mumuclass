@@ -4,7 +4,7 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import { Footer } from './Footer'
 
-const CATEGORIES = ['학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+const CATEGORIES = ['수업 진행', '학급 운영', '퀴즈/평가', '놀이/게임', 'AI/코딩', '기타']
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 /* ── 별점 ── */
@@ -294,7 +294,10 @@ export default function AppDetail() {
         {/* ── 헤더: 제목 + 통계 ── */}
         <div className="retro-detail__header">
           <div className="retro-detail__header-left">
-            <h1 className="retro-detail__title">{app.title}</h1>
+            <h1 className="retro-detail__title">
+              {app.app_number && <span className="retro-detail__mumu-number">MUMU-{String(app.app_number).padStart(3, '0')}</span>}
+              {app.title}
+            </h1>
             <p className="retro-detail__desc">{app.one_line_desc}</p>
             <div className="retro-detail__stats">
               <span className="retro-detail__stat">

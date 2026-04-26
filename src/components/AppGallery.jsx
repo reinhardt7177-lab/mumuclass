@@ -31,7 +31,7 @@ import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 import './AppGallery.css'
 
-const CATEGORIES = ['전체', '학급관리', '수학', '국어', '게임', '퍼즐', '에듀테크', '기타']
+const CATEGORIES = ['전체', '수업 진행', '학급 운영', '퀴즈/평가', '놀이/게임', 'AI/코딩', '기타']
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL || 'mumuclass@mumuclass.kr'
 
 const EMPTY_FORM = {

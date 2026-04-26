@@ -1460,14 +1460,14 @@ img { max-width: 100%; }
 .retro-topbar__inner { display: flex; align-items: center; gap: 1rem; }
 .retro-topbar__brand { font-family: 'Arial Black', sans-serif; font-size: 1.5rem; font-weight: 900; color: #f39c12; text-shadow: 2px 2px 0 #000; letter-spacing: -1px; }
 .retro-topbar__sub { font-size: 0.85rem; color: #ccc; border-left: 1px solid #555; padding-left: 1rem; }
-.retro-nav { display: flex; align-items: stretch; background: #3e3e3e; border-bottom: 1px solid #222; }
-.retro-nav__tabs { display: flex; flex: 1 1 0; overflow-x: auto; min-width: 0; }
-.retro-nav__item { padding: 0.6rem 1.2rem; color: #ddd; font-size: 0.85rem; font-weight: 600; background: transparent; border: none; border-right: 1px solid #555; cursor: pointer; white-space: nowrap; }
-.retro-nav__item:hover { background: #555; color: white; }
-.retro-nav__item--active { background: #f8f9fa; color: #d35400; border-bottom: 2px solid #d35400; }
-/* 업로드 버튼 – 탭바 맨 오른쪽 */
-.retro-nav__upload { flex: 0 0 auto; display: flex; align-items: center; padding: 0.6rem 1.2rem; height: 100%; color: #00ffe7; font-size: 0.85rem; font-weight: 800; background: transparent; border: none; border-left: 1px solid #555; cursor: pointer; letter-spacing: 0.04em; white-space: nowrap; text-shadow: 0 0 6px #00ffe7, 0 0 14px #00ffe7; transition: text-shadow 0.2s, background 0.15s; }
-.retro-nav__upload:hover { background: rgba(0,255,231,0.1); text-shadow: 0 0 8px #00ffe7, 0 0 20px #00ffe7, 0 0 36px #00ffe7; }
+.retro-nav { display: flex; align-items: center; justify-content: center; padding: 0.75rem 1rem; background: transparent; gap: 0.75rem; }
+.retro-nav__tabs { display: flex; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; gap: 0; background: rgba(255,255,255,0.5); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 12px; border: 1px solid rgba(0,0,0,0.06); padding: 3px; }
+.retro-nav__tabs::-webkit-scrollbar { display: none; }
+.retro-nav__item { padding: 0.5rem 1rem; border-radius: 10px; border: none; font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); background: transparent; cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+.retro-nav__item:hover { color: var(--accent); background: rgba(108,92,231,0.06); }
+.retro-nav__item--active { background: white; color: var(--accent); box-shadow: 0 2px 8px rgba(0,0,0,0.06); font-weight: 700; }
+.retro-nav__upload { flex-shrink: 0; padding: 0.5rem 1rem; background: var(--accent); color: white; border: none; border-radius: 10px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+.retro-nav__upload:hover { background: #5a4bd1; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(108,92,231,0.3); }
 
 /* ── 업로드 모달 ── */
 .upload-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(5px); z-index: 500; display: flex; align-items: center; justify-content: center; padding: 1rem; }
@@ -2613,5 +2613,254 @@ img { max-width: 100%; }
   .category-add-form__input--small {
     max-width: 100%;
   }
+}
+
+/* ══════════════════════════════════════════
+   Purpose Chips
+   ══════════════════════════════════════════ */
+.purpose-chips {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.4rem 1rem 0;
+  overflow: hidden;
+}
+.purpose-chips__scroll {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 0.3rem;
+}
+.purpose-chips__scroll::-webkit-scrollbar { display: none; }
+.purpose-chip {
+  flex-shrink: 0;
+  padding: 0.35rem 0.85rem;
+  border-radius: 50px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.6);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.purpose-chip:hover {
+  background: rgba(108, 92, 231, 0.08);
+  color: var(--accent);
+  border-color: rgba(108, 92, 231, 0.2);
+}
+.purpose-chip--active {
+  background: rgba(108, 92, 231, 0.12);
+  color: var(--accent);
+  border-color: rgba(108, 92, 231, 0.3);
+  font-weight: 700;
+}
+.purpose-chip--pinned::before {
+  content: '\1F4CC ';
+  font-size: 0.7rem;
+}
+.purpose-chip--clear {
+  background: rgba(231, 76, 60, 0.08);
+  color: #e74c3c;
+  border-color: rgba(231, 76, 60, 0.2);
+}
+.purpose-chip--clear:hover {
+  background: rgba(231, 76, 60, 0.15);
+}
+
+/* ══════════════════════════════════════════
+   Search Bar
+   ══════════════════════════════════════════ */
+.retro-search {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0.6rem 1rem;
+}
+.retro-search__input {
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.retro-search__input:focus {
+  border-color: var(--accent-light);
+  box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.1);
+}
+.retro-search__input::placeholder {
+  color: var(--text-muted);
+}
+
+/* ══════════════════════════════════════════
+   Dogam Header
+   ══════════════════════════════════════════ */
+.dogam-header {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem 1rem 0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+.dogam-header__title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--text-primary);
+}
+.dogam-header__count {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* ══════════════════════════════════════════
+   MUMU Number Badge
+   ══════════════════════════════════════════ */
+.retro-card__mumu {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  color: #a29bfe;
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  z-index: 3;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+.rank-card__mumu {
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: #a29bfe;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.3px;
+  margin-left: 0.4rem;
+}
+.retro-detail__mumu-number {
+  display: inline-block;
+  background: var(--accent-bg);
+  color: var(--accent);
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.5px;
+  margin-right: 0.5rem;
+  vertical-align: middle;
+}
+
+/* ══════════════════════════════════════════
+   Rank List (Dogam view)
+   ══════════════════════════════════════════ */
+.rank-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.rank-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius);
+  transition: transform 0.15s, box-shadow 0.15s;
+  color: inherit;
+}
+.rank-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+.rank-card__num {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-weight: 900;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.03);
+}
+.rank-card__num--top {
+  background: linear-gradient(135deg, var(--accent), var(--accent-light));
+  font-size: 1.1rem;
+}
+.rank-card__thumb {
+  flex-shrink: 0;
+  width: 64px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f0f0f0;
+  border: 1px solid var(--border);
+}
+.rank-card__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.rank-card__info {
+  flex: 1;
+  min-width: 0;
+}
+.rank-card__title {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+  line-height: 1.3;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+}
+.rank-card__meta {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+.rank-card__cat {
+  font-weight: 700;
+}
+
+@media (max-width: 600px) {
+  .retro-nav { flex-wrap: wrap; gap: 0.5rem; padding: 0.5rem; }
+  .retro-nav__tabs { padding: 2px; border-radius: 10px; }
+  .retro-nav__item { padding: 0.4rem 0.7rem; font-size: 0.75rem; border-radius: 8px; }
+  .retro-nav__upload { font-size: 0.75rem; padding: 0.4rem 0.7rem; border-radius: 8px; }
+  .purpose-chips { padding: 0.3rem 0.5rem 0; }
+  .purpose-chip { padding: 0.3rem 0.65rem; font-size: 0.72rem; }
+  .retro-search { padding: 0.4rem 0.5rem; }
+  .retro-search__input { padding: 0.5rem 0.75rem; font-size: 0.82rem; border-radius: 10px; }
+  .dogam-header { padding: 0.6rem 0.5rem 0; }
+  .dogam-header__title { font-size: 1.1rem; }
+  .rank-card { padding: 0.5rem; gap: 0.5rem; }
+  .rank-card__num { width: 30px; height: 30px; font-size: 0.8rem; }
+  .rank-card__num--top { font-size: 1rem; }
+  .rank-card__thumb { width: 48px; height: 36px; }
+  .rank-card__title { font-size: 0.85rem; }
 }
 

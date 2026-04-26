@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../supabaseClient'
 import { useAuth } from '../contexts/AuthContext'
 
-const FALLBACK_CATEGORIES = ['학급관리', '수학', '국어', '게임', '에듀테크', '기타']
+const FALLBACK_CATEGORIES = ['수업 진행', '학급 운영', '퀴즈/평가', '놀이/게임', 'AI/코딩', '기타']
 
 export default function CreateAppRequest() {
   const navigate = useNavigate()

@@ -239,13 +239,12 @@ function ReviewsTab({ msg, setMsg }) {
 
 /* ── 기본 카테고리 (BEST 제외) ── */
 const DEFAULT_CATEGORIES = [
-  { id: '학급관리', label: '학급관리', emoji: '🏫', sort_order: 0 },
-  { id: '수학', label: '수학', emoji: '🔢', sort_order: 1 },
-  { id: '국어', label: '국어', emoji: '📖', sort_order: 2 },
-  { id: '게임', label: '게임', emoji: '🎮', sort_order: 3 },
-  { id: '퍼즐', label: '퍼즐', emoji: '🧩', sort_order: 4 },
-  { id: '에듀테크', label: '에듀테크', emoji: '💡', sort_order: 5 },
-  { id: '기타', label: '기타', emoji: '📁', sort_order: 6 },
+  { id: '수업진행', label: '수업 진행', emoji: '📚', sort_order: 0 },
+  { id: '학급운영', label: '학급 운영', emoji: '🏫', sort_order: 1 },
+  { id: '퀴즈평가', label: '퀴즈/평가', emoji: '📝', sort_order: 2 },
+  { id: '놀이게임', label: '놀이/게임', emoji: '🎮', sort_order: 3 },
+  { id: 'AI코딩', label: 'AI/코딩', emoji: '🤖', sort_order: 4 },
+  { id: '기타', label: '기타', emoji: '📁', sort_order: 5 },
 ]
 
 /* ── 카테고리 관리 탭 ── */
@@ -484,6 +483,132 @@ function CategoriesTab({ msg, setMsg }) {
   )
 }
 
+/* ── 태그 관리 탭 ── */
+function TagsTab({ msg, setMsg }) {
+  const [featured, setFeatured] = useState([])
+  const [tagUsage, setTagUsage] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [newTag, setNewTag] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => { fetchAll() }, [])
+
+  const fetchAll = async () => {
+    setLoading(true)
+    const [{ data: ft }, { data: tu }] = await Promise.all([
+      supabase.from('featured_tags').select('*').order('sort_order', { ascending: true }),
+      supabase.from('tag_usage').select('tag, usage_count').limit(30),
+    ])
+    setFeatured(ft || [])
+    setTagUsage(tu || [])
+    setLoading(false)
+  }
+
+  const handleAdd = async () => {
+    if (!newTag.trim()) return
+    if (featured.find(f => f.tag_name === newTag.trim())) {
+      setMsg({ type: 'error', text: '이미 등록된 태그입니다.' })
+      setTimeout(() => setMsg(null), 2000)
+      return
+    }
+    setSaving(true)
+    const { error } = await supabase.from('featured_tags').insert({
+      tag_name: newTag.trim(),
+      sort_order: featured.length,
+      is_pinned: true,
+    })
+    if (error) {
+      setMsg({ type: 'error', text: '추가 실패: ' + error.message })
+    } else {
+      setMsg({ type: 'success', text: `"${newTag.trim()}" 태그 추가 완료!` })
+      setNewTag('')
+      fetchAll()
+    }
+    setSaving(false)
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  const handleToggle = async (tag) => {
+    const { error } = await supabase.from('featured_tags').update({ is_pinned: !tag.is_pinned }).eq('id', tag.id)
+    if (!error) {
+      setFeatured(prev => prev.map(f => f.id === tag.id ? { ...f, is_pinned: !f.is_pinned } : f))
+    }
+  }
+
+  const handleDelete = async (tag) => {
+    if (!confirm(`"${tag.tag_name}" 태그를 삭제하시겠습니까?`)) return
+    await supabase.from('featured_tags').delete().eq('id', tag.id)
+    setFeatured(prev => prev.filter(f => f.id !== tag.id))
+    setMsg({ type: 'success', text: '태그 삭제 완료' })
+    setTimeout(() => setMsg(null), 2000)
+  }
+
+  if (loading) return <p style={{ color: '#888', padding: '2rem' }}>불러오는 중...</p>
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+      {/* 추가 폼 */}
+      <div style={{ border: '1px solid #e5e7eb', borderRadius: 10, padding: '1.2rem', background: '#fafafa' }}>
+        <p style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: '0.75rem' }}>📌 추천 태그 추가</p>
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <input
+            type="text"
+            placeholder="태그 이름 (예: 수학, 1학년)"
+            value={newTag}
+            onChange={e => setNewTag(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && handleAdd()}
+            style={{ flex: 1, padding: '0.5rem 0.7rem', border: '1px solid #d1d5db', borderRadius: 6, fontSize: '0.85rem' }}
+          />
+          <button onClick={handleAdd} disabled={saving} style={S.btn('#6c5ce7', '#fff')}>
+            {saving ? '추가 중...' : '✅ 추가'}
+          </button>
+        </div>
+      </div>
+
+      {/* 추천 태그 목록 */}
+      <div>
+        <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.75rem' }}>📌 추천 태그 {featured.length}개</p>
+        {featured.length === 0 ? (
+          <p style={{ color: '#aaa', textAlign: 'center', padding: '1.5rem' }}>등록된 추천 태그가 없습니다.</p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {featured.map(tag => (
+              <div key={tag.id} style={{ ...S.card, alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <span style={{ fontWeight: 700, fontSize: '0.95rem' }}>#{tag.tag_name}</span>
+                  <span style={{ fontSize: '0.75rem', color: '#aaa', marginLeft: '0.5rem' }}>
+                    {tag.is_pinned ? '📌 고정됨' : '고정 해제'}
+                  </span>
+                </div>
+                <button onClick={() => handleToggle(tag)} style={S.btn(tag.is_pinned ? 'rgba(243,156,18,0.1)' : 'rgba(108,92,231,0.1)', tag.is_pinned ? '#f39c12' : '#6c5ce7', `1px solid ${tag.is_pinned ? 'rgba(243,156,18,0.3)' : 'rgba(108,92,231,0.3)'}`)}>
+                  {tag.is_pinned ? '📌 해제' : '📌 고정'}
+                </button>
+                <button onClick={() => handleDelete(tag)} style={S.btn('rgba(231,76,60,0.1)', '#e74c3c', '1px solid rgba(231,76,60,0.3)')}>🗑️</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* 태그 사용 현황 */}
+      <div>
+        <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '0.75rem' }}>📊 태그 사용 현황 (자동 집계)</p>
+        {tagUsage.length === 0 ? (
+          <p style={{ color: '#aaa', textAlign: 'center', padding: '1.5rem' }}>사용된 태그가 없습니다.</p>
+        ) : (
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+            {tagUsage.map(t => (
+              <span key={t.tag} style={{ background: 'rgba(108,92,231,0.08)', color: '#6c5ce7', padding: '4px 10px', borderRadius: 20, fontSize: '0.8rem', fontWeight: 600 }}>
+                #{t.tag} <span style={{ color: '#aaa', fontWeight: 400 }}>({t.usage_count})</span>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 /* ── 메인 ── */
 export default function AdminPanel() {
   const { user, loading: authLoading } = useAuth()
@@ -507,7 +632,7 @@ export default function AdminPanel() {
 
       {/* 탭 */}
       <div style={{ display: 'flex', gap: 0, borderBottom: '2px solid #e5e7eb', marginBottom: '1.5rem' }}>
-        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리 관리']].map(([key, label]) => (
+        {[['pending', '⏳ 승인 대기'], ['approved', '📋 앱 관리'], ['reviews', '💬 리뷰 관리'], ['categories', '🏷️ 카테고리'], ['tags', '📌 태그 관리']].map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', background: 'none', border: 'none', cursor: 'pointer',
             fontWeight: 700, fontSize: '0.88rem',
@@ -532,6 +657,7 @@ export default function AdminPanel() {
       {tab === 'approved' && <ApprovedTab msg={msg} setMsg={setMsg} />}
       {tab === 'reviews' && <ReviewsTab msg={msg} setMsg={setMsg} />}
       {tab === 'categories' && <CategoriesTab msg={msg} setMsg={setMsg} />}
+      {tab === 'tags' && <TagsTab msg={msg} setMsg={setMsg} />}
     </div>
   )
 }
