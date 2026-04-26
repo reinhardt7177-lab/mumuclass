@@ -74,7 +74,7 @@ export default function CompanyStory() {
         supabase.from('apps').select('id, title, category, screenshot_url, rating, creator_name').eq('approved', true).order('created_at', { ascending: false }).limit(4),
         supabase.from('site_visits').select('count'),
         supabase.from('app_requests').select('id, title, status, created_at, author_name').order('created_at', { ascending: false }).limit(5),
-        supabase.from('community_posts').select('id, title, created_at, author_name').order('created_at', { ascending: false }).limit(5),
+        supabase.from('posts').select('id, title, created_at, author_name').order('created_at', { ascending: false }).limit(5),
       ])
       const totalVisits = (visits || []).reduce((sum, v) => sum + (v.count || 0), 0)
       setStats({

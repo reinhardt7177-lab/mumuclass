@@ -537,10 +537,9 @@ function MembersTab({ msg, setMsg }) {
 
     if (error) {
       // 뷰가 없으면 앱/리뷰 테이블에서 유저 정보 집계
-      const [{ data: appData }, { data: reviewData }, { data: chatData }] = await Promise.all([
+      const [{ data: appData }, { data: reviewData }] = await Promise.all([
         supabase.from('apps').select('creator_email, creator_name, created_at'),
         supabase.from('app_reviews').select('user_email, user_name, created_at'),
-        supabase.from('chat_messages').select('user_id, user_name, created_at'),
       ])
 
       const userMap = {}
