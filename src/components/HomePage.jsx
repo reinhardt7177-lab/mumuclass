@@ -235,7 +235,7 @@ function UploadModal({ user, onClose, onUploaded, uploadCategories }) {
 }
 
 /* ── 홈페이지 카드 ── */
-function AppCard({ app }) {
+function AppCard({ app, rank }) {
   const colors = { '학급관리': '#e17055', '수학': '#6c5ce7', '국어': '#00b894', '게임': '#e84393', '퍼즐': '#f39c12', '에듀테크': '#00cec9', '기타': '#636e72' }
   const color = colors[app.category] || '#636e72'
   const thumbUrl = app.screenshot_url?.startsWith('http')
@@ -259,11 +259,14 @@ function AppCard({ app }) {
             <span className="retro-card__img-title">{app.title}</span>
           </>
         )}
+        {rank && (
+          <span className={`retro-card__rank ${rank <= 3 ? 'retro-card__rank--top' : ''}`}>{rank}</span>
+        )}
         {app.rating > 0 && (
           <span className="retro-card__img-rating" style={{ position: 'absolute', bottom: 6, right: 6, zIndex: 2, background: 'rgba(0,0,0,0.55)', padding: '1px 5px', borderRadius: 3 }}>★ {(app.rating).toFixed(1)}</span>
         )}
         {app.is_best && (
-          <span style={{ position: 'absolute', top: 6, left: 6, background: '#f39c12', color: '#000', fontSize: '0.65rem', fontWeight: 900, padding: '2px 6px', borderRadius: 3, zIndex: 2 }}>BEST</span>
+          <span style={{ position: 'absolute', top: 6, left: rank ? 36 : 6, background: '#f39c12', color: '#000', fontSize: '0.65rem', fontWeight: 900, padding: '2px 6px', borderRadius: 3, zIndex: 2 }}>BEST</span>
         )}
       </div>
       <div className="retro-card__info">
@@ -275,34 +278,41 @@ function AppCard({ app }) {
   )
 }
 
-/* ── 리스트형 앱 아이템 ── */
-function AppListItem({ app }) {
+/* ── 랭킹형 앱 아이템 ── */
+function AppListItem({ app, rank }) {
+  const MEDALS = { 1: '🥇', 2: '🥈', 3: '🥉' }
   const CAT_COLORS = { '학급관리': '#e17055', '수학': '#6c5ce7', '국어': '#00b894', '게임': '#e84393', '퍼즐': '#f39c12', '에듀테크': '#00cec9', '기타': '#636e72', '교과': '#5B9BD5', '사회': '#f39c12', '체육': '#e84393' }
   const color = CAT_COLORS[app.category] || '#636e72'
-  const initial = (app.title || '?').charAt(0)
+  const thumbUrl = app.screenshot_url?.startsWith('http')
+    ? app.screenshot_url
+    : (app.preview_url ? toThumbUrl(app.preview_url) : '')
+  const [imgOk, setImgOk] = useState(!!thumbUrl)
 
   return (
-    <Link to={`/apps/${app.id}`} className="app-list-item">
-      <div className="app-list-item__avatar" style={{ background: color }}>
-        {initial}
+    <Link to={`/apps/${app.id}`} className={`rank-card ${rank <= 3 ? 'rank-card--top' : ''}`}>
+      <div className={`rank-card__num ${rank <= 3 ? 'rank-card__num--top' : ''}`}>
+        {MEDALS[rank] || rank}
       </div>
-      <div className="app-list-item__body">
-        <div className="app-list-item__top">
-          <span className="app-list-item__creator">{app.creator_name || '익명'}</span>
-          <span className="app-list-item__sep">/</span>
-          <span className="app-list-item__title">{app.title}</span>
-          {app.is_best && <span className="app-list-item__best">BEST</span>}
-          {app.rating > 0 && <span className="app-list-item__rating">★ {app.rating.toFixed(1)}</span>}
-        </div>
-        {app.one_line_desc && (
-          <p className="app-list-item__desc">{app.one_line_desc}</p>
+      <div className="rank-card__thumb">
+        {thumbUrl && imgOk ? (
+          <img src={thumbUrl} alt={app.title} onError={() => setImgOk(false)} />
+        ) : (
+          <div className="rank-card__thumb-fallback" style={{ background: `linear-gradient(135deg, ${color}22, ${color}44)` }}>
+            <span style={{ fontSize: '1.5rem' }}>{(app.title || '?').charAt(0)}</span>
+          </div>
         )}
-        <div className="app-list-item__meta">
-          <span className="app-list-item__cat" style={{ color }}>{app.category || '기타'}</span>
-          {app.tags?.length > 0 && app.tags.slice(0, 3).map((t, i) => (
-            <span key={i} className="app-list-item__tag">#{t}</span>
-          ))}
-          <span className="app-list-item__views">👁 {app.view_count || 0}</span>
+      </div>
+      <div className="rank-card__body">
+        <div className="rank-card__top">
+          <span className="rank-card__title">{app.title}</span>
+          {app.is_best && <span className="rank-card__best">BEST</span>}
+          {app.rating > 0 && <span className="rank-card__rating">★ {app.rating.toFixed(1)}</span>}
+        </div>
+        <p className="rank-card__desc">{app.one_line_desc || ''}</p>
+        <div className="rank-card__meta">
+          <span className="rank-card__cat" style={{ color }}>{app.category || '기타'}</span>
+          <span className="rank-card__creator">{app.creator_name || '익명'}</span>
+          <span className="rank-card__views">👁 {(app.view_count || 0).toLocaleString()}</span>
         </div>
       </div>
     </Link>
@@ -486,12 +496,12 @@ export default function HomePage() {
           ) : filteredApps.length === 0 ? (
             <div className="retro-loading"><span>📦</span><p>{search ? '검색 결과가 없습니다' : '앱이 없습니다'}</p></div>
           ) : isListView ? (
-            <div className="app-list">
-              {filteredApps.map((app) => <AppListItem key={app.id} app={app} />)}
+            <div className="rank-list">
+              {filteredApps.map((app, i) => <AppListItem key={app.id} app={app} rank={i + 1} />)}
             </div>
           ) : (
             <div className="retro-grid">
-              {filteredApps.map((app) => <AppCard key={app.id} app={app} />)}
+              {filteredApps.map((app, i) => <AppCard key={app.id} app={app} rank={i + 1} />)}
             </div>
           )}
         </div>
