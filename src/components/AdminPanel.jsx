@@ -38,8 +38,20 @@ function PendingTab({ msg, setMsg }) {
   const handleDelete = async (id) => {
     if (!confirm('이 앱을 삭제하시겠습니까?')) return
     if (!confirm('⚠️ 정말 삭제합니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?')) return
-    await supabase.from('apps').delete().eq('id', id)
+    const { data, error } = await supabase.from('apps').delete().eq('id', id).select()
+    if (error) {
+      setMsg({ type: 'error', text: `삭제 실패: ${error.message}` })
+      setTimeout(() => setMsg(null), 4000)
+      return
+    }
+    if (!data || data.length === 0) {
+      setMsg({ type: 'error', text: '삭제되지 않았습니다. Supabase RLS DELETE 정책이 없는 것 같습니다 (콘솔 확인).' })
+      setTimeout(() => setMsg(null), 5000)
+      return
+    }
     setPending(prev => prev.filter(a => a.id !== id))
+    setMsg({ type: 'success', text: '삭제 완료' })
+    setTimeout(() => setMsg(null), 2000)
   }
 
   if (loading) return <p style={{ color: '#888', padding: '2rem' }}>불러오는 중...</p>
@@ -125,8 +137,21 @@ function ApprovedTab({ msg, setMsg }) {
   const handleDelete = async (id, title) => {
     if (!confirm(`"${title}"을(를) 삭제하시겠습니까?`)) return
     if (!confirm(`⚠️ 정말 삭제합니다. 이 작업은 되돌릴 수 없습니다. 계속하시겠습니까?`)) return
-    await supabase.from('apps').delete().eq('id', id)
+    await supabase.from('app_reviews').delete().eq('app_id', id)
+    const { data, error } = await supabase.from('apps').delete().eq('id', id).select()
+    if (error) {
+      setMsg({ type: 'error', text: `삭제 실패: ${error.message}` })
+      setTimeout(() => setMsg(null), 4000)
+      return
+    }
+    if (!data || data.length === 0) {
+      setMsg({ type: 'error', text: '삭제되지 않았습니다. Supabase RLS DELETE 정책이 없는 것 같습니다 (콘솔 확인).' })
+      setTimeout(() => setMsg(null), 5000)
+      return
+    }
     setApps(prev => prev.filter(a => a.id !== id))
+    setMsg({ type: 'success', text: `"${title}" 삭제 완료` })
+    setTimeout(() => setMsg(null), 2000)
   }
 
   const handleUnapprove = async (id) => {

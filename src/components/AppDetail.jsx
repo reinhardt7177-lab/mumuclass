@@ -288,15 +288,25 @@ export default function AppDetail() {
 
   const handleDeleteReview = async (reviewId) => {
     if (!confirm('리뷰를 삭제하시겠습니까?')) return
-    await supabase.from('app_reviews').delete().eq('id', reviewId)
+    const { data, error } = await supabase.from('app_reviews').delete().eq('id', reviewId).select()
+    if (error) { alert(`삭제 실패: ${error.message}`); return }
+    if (!data || data.length === 0) {
+      alert('삭제되지 않았습니다. RLS DELETE 정책 확인 필요.')
+      return
+    }
     await updateAppRating(); await fetchReviews()
   }
 
   const handleDeleteApp = async () => {
     if (!confirm('정말 이 앱을 삭제하시겠습니까?')) return
-    const { error } = await supabase.from('apps').delete().eq('id', id)
-    if (!error) navigate('/')
-    else alert(`삭제 실패: ${error.message}`)
+    await supabase.from('app_reviews').delete().eq('app_id', id)
+    const { data, error } = await supabase.from('apps').delete().eq('id', id).select()
+    if (error) { alert(`삭제 실패: ${error.message}`); return }
+    if (!data || data.length === 0) {
+      alert('삭제되지 않았습니다. Supabase RLS DELETE 정책이 없는 것 같습니다.')
+      return
+    }
+    navigate('/')
   }
 
   const toggleFullscreen = () => {
