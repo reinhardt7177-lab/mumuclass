@@ -9,7 +9,7 @@ const links = [
   { path: '/story', label: '우리의 이야기' },
   { path: '/ai-tech', label: '바이브코딩 요청' },
   { path: '/community', label: '커뮤니티' },
-  { path: '/milkit', label: '밀키트' },
+  { path: '/mealkit', label: '밀키트' },
 ]
 
 export function useVisitorCount() {

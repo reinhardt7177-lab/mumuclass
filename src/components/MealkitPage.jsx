@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Footer } from './Footer'
 
-const MILKIT_PASSWORD = import.meta.env.VITE_MILKIT_PASSWORD || 'mumuclass2026'
+const MEALKIT_PASSWORD = import.meta.env.VITE_MEALKIT_PASSWORD || 'mumuclass2026'
 
 const RESOURCES = [
   { id: 1, title: '바이브코딩 완벽 가이드', desc: '프롬프트 작성부터 배포까지 A to Z', icon: '📘', tag: '가이드' },
@@ -12,22 +12,22 @@ const RESOURCES = [
   { id: 6, title: '코딩 수업 커리큘럼', desc: '초등~중등 단계별 코딩 수업 지도안', icon: '💻', tag: '커리큘럼' },
 ]
 
-export default function MilkitPage() {
+export default function MealkitPage() {
   const [authenticated, setAuthenticated] = useState(false)
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [shake, setShake] = useState(false)
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('milkit_auth')
+    const saved = sessionStorage.getItem('mealkit_auth')
     if (saved === 'true') setAuthenticated(true)
   }, [])
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (password === MILKIT_PASSWORD) {
+    if (password === MEALKIT_PASSWORD) {
       setAuthenticated(true)
-      sessionStorage.setItem('milkit_auth', 'true')
+      sessionStorage.setItem('mealkit_auth', 'true')
       setError('')
     } else {
       setError('비밀번호가 올바르지 않습니다')
@@ -39,23 +39,23 @@ export default function MilkitPage() {
   if (!authenticated) {
     return (
       <>
-        <div className="milkit-gate">
-          <div className={`milkit-gate__card ${shake ? 'milkit-gate__card--shake' : ''}`}>
-            <div className="milkit-gate__icon">🔐</div>
-            <h1 className="milkit-gate__title">VIP 밀키트</h1>
-            <p className="milkit-gate__desc">이 자료실은 VIP 전용입니다.<br />비밀번호를 입력해 주세요.</p>
-            <form onSubmit={handleSubmit} className="milkit-gate__form">
+        <div className="mealkit-gate">
+          <div className={`mealkit-gate__card ${shake ? 'mealkit-gate__card--shake' : ''}`}>
+            <div className="mealkit-gate__icon">🔐</div>
+            <h1 className="mealkit-gate__title">VIP 밀키트</h1>
+            <p className="mealkit-gate__desc">이 자료실은 VIP 전용입니다.<br />비밀번호를 입력해 주세요.</p>
+            <form onSubmit={handleSubmit} className="mealkit-gate__form">
               <input
                 type="password"
-                className="milkit-gate__input"
+                className="mealkit-gate__input"
                 placeholder="비밀번호 입력"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); setError('') }}
                 autoFocus
               />
-              <button type="submit" className="milkit-gate__btn">입장하기</button>
+              <button type="submit" className="mealkit-gate__btn">입장하기</button>
             </form>
-            {error && <p className="milkit-gate__error">{error}</p>}
+            {error && <p className="mealkit-gate__error">{error}</p>}
           </div>
         </div>
         <Footer />
@@ -65,23 +65,23 @@ export default function MilkitPage() {
 
   return (
     <>
-      <div className="milkit-page">
-        <div className="milkit-header">
-          <span className="milkit-header__badge">VIP ONLY</span>
-          <h1 className="milkit-header__title">밀키트 자료실</h1>
-          <p className="milkit-header__desc">VIP 전용 교육 자료와 템플릿을 만나보세요</p>
+      <div className="mealkit-page">
+        <div className="mealkit-header">
+          <span className="mealkit-header__badge">VIP ONLY</span>
+          <h1 className="mealkit-header__title">밀키트 자료실</h1>
+          <p className="mealkit-header__desc">VIP 전용 교육 자료와 템플릿을 만나보세요</p>
         </div>
 
-        <div className="milkit-grid">
+        <div className="mealkit-grid">
           {RESOURCES.map((res) => (
-            <div key={res.id} className="milkit-card">
-              <div className="milkit-card__icon">{res.icon}</div>
-              <div className="milkit-card__body">
-                <span className="milkit-card__tag">{res.tag}</span>
-                <h3 className="milkit-card__title">{res.title}</h3>
-                <p className="milkit-card__desc">{res.desc}</p>
+            <div key={res.id} className="mealkit-card">
+              <div className="mealkit-card__icon">{res.icon}</div>
+              <div className="mealkit-card__body">
+                <span className="mealkit-card__tag">{res.tag}</span>
+                <h3 className="mealkit-card__title">{res.title}</h3>
+                <p className="mealkit-card__desc">{res.desc}</p>
               </div>
-              <button className="milkit-card__btn">준비중</button>
+              <button className="mealkit-card__btn">준비중</button>
             </div>
           ))}
         </div>

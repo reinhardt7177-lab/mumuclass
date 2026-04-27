@@ -3798,9 +3798,9 @@ img { max-width: 100%; }
 }
 
 /* ============================================================
-   MILKIT VIP PAGE
+   MEALKIT VIP PAGE
    ============================================================ */
-.milkit-gate {
+.mealkit-gate {
   padding-top: 64px;
   min-height: 100vh;
   display: flex;
@@ -3808,7 +3808,7 @@ img { max-width: 100%; }
   justify-content: center;
   background: linear-gradient(160deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
-.milkit-gate__card {
+.mealkit-gate__card {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
@@ -3820,36 +3820,36 @@ img { max-width: 100%; }
   width: 90%;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
 }
-.milkit-gate__card--shake {
-  animation: milkit-shake 0.4s ease;
+.mealkit-gate__card--shake {
+  animation: mealkit-shake 0.4s ease;
 }
-@keyframes milkit-shake {
+@keyframes mealkit-shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-10px); }
   40% { transform: translateX(10px); }
   60% { transform: translateX(-6px); }
   80% { transform: translateX(6px); }
 }
-.milkit-gate__icon { font-size: 3rem; margin-bottom: 1rem; }
-.milkit-gate__title {
+.mealkit-gate__icon { font-size: 3rem; margin-bottom: 1rem; }
+.mealkit-gate__title {
   font-size: 1.6rem;
   font-weight: 900;
   color: #fff;
   margin-bottom: 0.5rem;
   letter-spacing: -0.5px;
 }
-.milkit-gate__desc {
+.mealkit-gate__desc {
   font-size: 0.88rem;
   color: rgba(255, 255, 255, 0.6);
   line-height: 1.6;
   margin-bottom: 1.5rem;
 }
-.milkit-gate__form {
+.mealkit-gate__form {
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
 }
-.milkit-gate__input {
+.mealkit-gate__input {
   width: 100%;
   padding: 0.75rem 1rem;
   border-radius: 12px;
@@ -3863,12 +3863,12 @@ img { max-width: 100%; }
   letter-spacing: 2px;
   transition: border-color 0.2s;
 }
-.milkit-gate__input:focus {
+.mealkit-gate__input:focus {
   border-color: #6c5ce7;
   box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
 }
-.milkit-gate__input::placeholder { color: rgba(255, 255, 255, 0.3); letter-spacing: 0; }
-.milkit-gate__btn {
+.mealkit-gate__input::placeholder { color: rgba(255, 255, 255, 0.3); letter-spacing: 0; }
+.mealkit-gate__btn {
   padding: 0.75rem;
   border-radius: 12px;
   border: none;
@@ -3879,11 +3879,11 @@ img { max-width: 100%; }
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
 }
-.milkit-gate__btn:hover {
+.mealkit-gate__btn:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(108, 92, 231, 0.4);
 }
-.milkit-gate__error {
+.mealkit-gate__error {
   color: #ff7675;
   font-size: 0.82rem;
   margin-top: 0.5rem;
@@ -3891,16 +3891,16 @@ img { max-width: 100%; }
 }
 
 /* ── 밀키트 메인 페이지 ── */
-.milkit-page {
+.mealkit-page {
   padding-top: 64px;
   min-height: 100vh;
   background: linear-gradient(160deg, #e8e0f0 0%, #dce6f5 40%, #e0f0ec 100%);
 }
-.milkit-header {
+.mealkit-header {
   text-align: center;
   padding: 2.5rem 1.5rem 1.5rem;
 }
-.milkit-header__badge {
+.mealkit-header__badge {
   display: inline-block;
   background: linear-gradient(135deg, #6c5ce7, #a29bfe);
   color: #fff;
@@ -3911,18 +3911,18 @@ img { max-width: 100%; }
   letter-spacing: 1.5px;
   margin-bottom: 0.8rem;
 }
-.milkit-header__title {
+.mealkit-header__title {
   font-size: 1.8rem;
   font-weight: 900;
   color: #1a1a2e;
   letter-spacing: -1px;
   margin-bottom: 0.4rem;
 }
-.milkit-header__desc {
+.mealkit-header__desc {
   font-size: 0.9rem;
   color: #666;
 }
-.milkit-grid {
+.mealkit-grid {
   max-width: 900px;
   margin: 0 auto;
   padding: 1rem 1.5rem 3rem;
@@ -3930,7 +3930,7 @@ img { max-width: 100%; }
   grid-template-columns: repeat(2, 1fr);
   gap: 1rem;
 }
-.milkit-card {
+.mealkit-card {
   background: rgba(255, 255, 255, 0.6);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
@@ -3942,13 +3942,13 @@ img { max-width: 100%; }
   gap: 0.6rem;
   transition: transform 0.2s, box-shadow 0.2s;
 }
-.milkit-card:hover {
+.mealkit-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 10px 30px rgba(108, 92, 231, 0.12);
 }
-.milkit-card__icon { font-size: 2rem; }
-.milkit-card__body { flex: 1; }
-.milkit-card__tag {
+.mealkit-card__icon { font-size: 2rem; }
+.mealkit-card__body { flex: 1; }
+.mealkit-card__tag {
   display: inline-block;
   font-size: 0.65rem;
   font-weight: 700;
@@ -3958,20 +3958,20 @@ img { max-width: 100%; }
   border-radius: 8px;
   margin-bottom: 0.3rem;
 }
-.milkit-card__title {
+.mealkit-card__title {
   font-size: 0.95rem;
   font-weight: 800;
   color: #1a1a2e;
   margin: 0 0 0.25rem;
   letter-spacing: -0.3px;
 }
-.milkit-card__desc {
+.mealkit-card__desc {
   font-size: 0.78rem;
   color: #777;
   line-height: 1.5;
   margin: 0;
 }
-.milkit-card__btn {
+.mealkit-card__btn {
   align-self: flex-start;
   padding: 0.4rem 1rem;
   border-radius: 8px;
@@ -3983,8 +3983,8 @@ img { max-width: 100%; }
   cursor: default;
 }
 @media (max-width: 600px) {
-  .milkit-grid { grid-template-columns: 1fr; padding: 1rem; }
-  .milkit-header__title { font-size: 1.4rem; }
-  .milkit-gate__card { padding: 2rem 1.5rem; }
+  .mealkit-grid { grid-template-columns: 1fr; padding: 1rem; }
+  .mealkit-header__title { font-size: 1.4rem; }
+  .mealkit-gate__card { padding: 2rem 1.5rem; }
 }
 

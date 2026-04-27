@@ -16,7 +16,7 @@ import AdminPanel from './components/AdminPanel'
 import AppLabBoard from './components/AppLabBoard'
 import CreateAppRequest from './components/CreateAppRequest'
 import AppRequestDetail from './components/AppRequestDetail'
-import MilkitPage from './components/MilkitPage'
+import MealkitPage from './components/MealkitPage'
 import ChatWidget from './components/ChatWidget'
 
 function ProtectedRoute({ children }) {
@@ -81,7 +81,7 @@ export default function App() {
           <Route path="/community/:id" element={
             <ProtectedRoute><PostDetail /></ProtectedRoute>
           } />
-          <Route path="/milkit" element={<MilkitPage />} />
+          <Route path="/mealkit" element={<MealkitPage />} />
           <Route path="/gallery" element={
             <ProtectedRoute><AppGallery /></ProtectedRoute>
           } />
